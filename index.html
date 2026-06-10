@@ -208,6 +208,28 @@
     .footer{margin-top:64px;padding-top:22px;border-top:0.5px solid var(--border);text-align:center}
     .footer-copy{font-size:12px;color:var(--muted)}
 
+    /* Тултип Skrillex на логотипе */
+    .logo-fan-tooltip{
+      position:absolute;top:calc(100% + 10px);left:0;
+      white-space:nowrap;
+      background:var(--bg);border:0.5px solid var(--border);
+      border-radius:10px;padding:7px 12px;
+      font-size:12px;font-weight:500;color:var(--text);
+      box-shadow:var(--shadow);
+      display:flex;align-items:center;gap:7px;
+      opacity:0;transform:translateY(-4px);pointer-events:none;
+      transition:opacity .2s,transform .2s;z-index:200;
+      font-family:'Inter',sans-serif;
+    }
+    .logo-fan-icon{width:16px;height:16px;border-radius:3px;flex-shrink:0}
+    .nav-logo:hover .logo-fan-tooltip{opacity:1;transform:translateY(0)}
+
+    /* Email — текст по низу */
+    #emailSub{margin-top:auto}
+
+    /* Фикс тултипа Notamedia — убираем preserve-3d */
+    .bcard-work{transform-style:flat}
+
     /* ANIMATIONS */
     @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
     .fu{animation:fadeUp .55s ease both}
@@ -239,6 +261,10 @@
   <a href="#" class="sg nav-logo" id="navLogo">
     <span class="logo-short" id="logoShort"></span>
     <span class="logo-full">Артём Чернобай</span>
+    <div class="logo-fan-tooltip">
+      <img src="https://www.google.com/s2/favicons?domain=skrillex.com&sz=32" alt="" class="logo-fan-icon">
+      Фанат Skrillex&nbsp;♪
+    </div>
   </a>
   <div class="nav-links">
     <a href="#about"   class="nav-link active" data-section="about">Обо мне</a>
@@ -255,7 +281,7 @@
   <section class="hero" id="about">
     <div class="hero-badge fu">
       <span class="badge-dot"></span>
-      UX/UI-дизайнер · Москва · открыт к предложениям
+      UX/UI-дизайнер · открыт к предложениям
     </div>
     <h1 class="sg hero-title fu fu1">
       Привет, я <span class="title-inv">Артём</span> —<br>
@@ -321,7 +347,7 @@
         <button class="ccard" id="emailBtn" onclick="copyEmail()">
           <div class="ccard-icon"><i class="ti ti-mail"></i></div>
           <div class="ccard-title">Email</div>
-          <div class="ccard-sub" id="emailSub">Нажми, скопирую</div>
+          <span class="ccard-action" id="emailSub">Нажми, скопирую</span>
         </button>
         <a href="https://dribbble.com/artemchernobay" target="_blank" rel="noopener" class="ccard">
           <div class="ccard-icon"><i class="ti ti-brand-dribbble"></i></div>
@@ -331,7 +357,7 @@
           <div class="ccard-icon"><i class="ti ti-brand-behance"></i></div>
           <div class="ccard-title">Behance</div>
         </a>
-        <a href="cv.pdf" download="CV_Artyom_Chernobay.pdf" class="ccard ccard-dim">
+        <a href="cv.pdf" download="CV_Artyom_Chernobay.pdf" class="ccard">
           <div class="ccard-icon"><i class="ti ti-file-cv"></i></div>
           <div class="ccard-title">Резюме</div>
           <div class="ccard-sub">PDF</div>
