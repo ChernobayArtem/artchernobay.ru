@@ -237,7 +237,7 @@
 
 <nav class="nav">
   <a href="#" class="sg nav-logo" id="navLogo">
-    <span class="logo-short">АЧ</span>
+    <span class="logo-short" id="logoShort"></span>
     <span class="logo-full">Артём Чернобай</span>
   </a>
   <div class="nav-links">
@@ -501,9 +501,34 @@ function preventWidows(){
   });
 }
 
+/* Треки Skrillex — случайный при загрузке */
+const SKRILLEX=[
+  'Bangarang','Recess','Kyoto','Rumble',
+  'Scary Monsters and Nice Sprites',
+  'First of the Year','Kill Everybody',
+  'Cinema','Bug Hunt','Ease My Mind',
+  'Where Are Ü Now','Dirty Vibe',
+  'Rock n Roll','Summit','Don\'t Go',
+  'Butterflies','Supersonic','RATATA',
+  'Still Here','Leave Me Like This'
+];
+
+function initLogo(){
+  const logo=document.getElementById('navLogo');
+  const shortEl=document.getElementById('logoShort');
+  const fullEl=logo.querySelector('.logo-full');
+  const track=SKRILLEX[Math.floor(Math.random()*SKRILLEX.length)];
+  shortEl.textContent=track;
+  logo.style.width=shortEl.offsetWidth+'px';
+  logo.style.transition='width 0.3s cubic-bezier(0.4,0,0.2,1)';
+  logo.addEventListener('mouseenter',()=>{logo.style.width=fullEl.offsetWidth+'px'});
+  logo.addEventListener('mouseleave',()=>{logo.style.width=shortEl.offsetWidth+'px'});
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   renderCases('all');
   updateExp();
+  initLogo();
   initReveal();
   initTilt();
   initMagnetic();
