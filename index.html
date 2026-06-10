@@ -122,7 +122,7 @@
     .author-placeholder{width:100%;height:220px;border-radius:12px;background:var(--surface);display:none;align-items:center;justify-content:center;font-size:40px;font-weight:700;color:var(--muted)}
 
     .bio-name{font-weight:600;font-size:17px;letter-spacing:-.02em;margin-bottom:8px}
-    .bio-text{font-size:13px;color:var(--text2);line-height:1.8}
+    .bio-text{font-size:13px;color:var(--text2);line-height:1.5}
     .bio-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
     .bio-tag{
       display:inline-flex;align-items:center;gap:5px;
@@ -134,12 +134,22 @@
     .exp-num{font-size:48px;font-weight:700;letter-spacing:-.05em;line-height:1}
     .exp-sub{font-size:12px;color:var(--muted);margin-top:6px}
 
+    /* scroll-margin-top — навбар не наезжает на контент */
+    #cases{scroll-margin-top:62px}
+    #contactCard{scroll-margin-top:62px}
+
     /* Тултип работы */
-    .bcard-work{position:relative;cursor:default}
-    .work-name{font-weight:600;font-size:16px;letter-spacing:-.02em;margin-bottom:4px}
+    .bcard-work{position:relative;cursor:default;overflow:visible;will-change:auto;transform-style:flat}
+    .work-name{font-weight:600;font-size:16px;letter-spacing:-.02em;margin-bottom:12px}
     .work-role{font-size:12px;color:var(--text2)}
     .work-date{font-size:11px;color:var(--muted);margin-top:3px}
-    .work-hint{font-size:10px;color:var(--muted);margin-top:10px;opacity:.5;letter-spacing:.02em}
+    /* стрелка ↗ в правом верхнем углу */
+    .work-arrow{
+      position:absolute;top:16px;right:16px;
+      font-size:13px;color:var(--muted);opacity:.45;
+      transition:opacity .2s,color .2s;
+    }
+    .bcard-work:hover .work-arrow{opacity:1;color:var(--text)}
     .work-tooltip{
       position:absolute;top:calc(100% + 10px);left:0;width:230px;
       background:var(--bg);border:0.5px solid var(--border);border-radius:14px;padding:16px;
@@ -227,9 +237,6 @@
     /* Email — текст по низу */
     #emailSub{margin-top:auto}
 
-    /* Фикс тултипа Notamedia — убираем preserve-3d */
-    .bcard-work{transform-style:flat}
-
     /* ANIMATIONS */
     @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
     .fu{animation:fadeUp .55s ease both}
@@ -304,7 +311,7 @@
       <div class="author-placeholder sg">АЧ</div>
       <div>
         <div class="sg bio-name">Артём Чернобай</div>
-        <div class="bio-text">Проектирую интерфейсы для сложных систем — там, где данные, процессы и&nbsp;люди пересекаются.</div>
+        <div class="bio-text">Проектирую интерфейсы для сложных систем — там, где данные, процессы и&nbsp;люди пересекаются</div>
       </div>
       <div class="bio-tags">
         <span class="bio-tag"><span class="bio-tag-dot" style="background:#3b82f6"></span>UX/UI</span>
@@ -320,11 +327,11 @@
     </div>
 
     <div class="bcard bcard-work reveal" style="transition-delay:.14s">
+      <i class="ti ti-arrow-up-right work-arrow"></i>
       <span class="bcard-label">СЕЙЧАС</span>
       <div class="sg work-name">Notamedia</div>
       <div class="work-role">Ведущий дизайнер</div>
       <div class="work-date">с янв. 2024</div>
-      <div class="work-hint">наведи, чтобы узнать больше</div>
       <div class="work-tooltip">
         <div class="wt-logo sg">NM</div>
         <div class="wt-name">Notamedia</div>
@@ -466,20 +473,42 @@ function updateExp(){
 /* Год футера */
 document.getElementById('footerYear').textContent=new Date().getFullYear();
 
-/* Nav: клик делает активным + highlight для контактов */
+/* Nav: клик + "Обо мне" → scroll top + highlight контактов */
 document.querySelectorAll('.nav-link').forEach(link=>{
-  link.addEventListener('click',function(){
+  link.addEventListener('click',function(e){
     document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
     this.classList.add('active');
-    if(this.dataset.section==='contact'){
+    const sec=this.dataset.section;
+    if(sec==='about'){
+      e.preventDefault();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    if(sec==='contact'){
       const card=document.getElementById('contactCard');
       card.classList.remove('contact-highlight');
-      void card.offsetWidth; // reflow
+      void card.offsetWidth;
       card.classList.add('contact-highlight');
       setTimeout(()=>card.classList.remove('contact-highlight'),2000);
     }
   });
 });
+
+/* IntersectionObserver — активный пункт меню при скролле */
+function initNavObserver(){
+  const map={about:'about',cases:'cases',contactCard:'contact'};
+  const sections=['about','cases','contactCard'].map(id=>document.getElementById(id)).filter(Boolean);
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const sec=map[e.target.id];
+        document.querySelectorAll('.nav-link').forEach(l=>{
+          l.classList.toggle('active',l.dataset.section===sec);
+        });
+      }
+    });
+  },{threshold:0.25,rootMargin:'-62px 0px -30% 0px'});
+  sections.forEach(s=>obs.observe(s));
+}
 
 /* Scroll reveal */
 function initReveal(){
@@ -491,9 +520,9 @@ function initReveal(){
   document.querySelectorAll('.bcard.reveal').forEach(el=>obs.observe(el));
 }
 
-/* 3D tilt на bcard */
+/* 3D tilt на bcard (кроме bcard-work — иначе ломается тултип) */
 function initTilt(){
-  document.querySelectorAll('.bcard').forEach(card=>{
+  document.querySelectorAll('.bcard:not(.bcard-work)').forEach(card=>{
     card.addEventListener('mousemove',e=>{
       const r=card.getBoundingClientRect();
       const x=(e.clientX-r.left)/r.width-.5;
@@ -558,6 +587,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   initReveal();
   initTilt();
   initMagnetic();
+  initNavObserver();
   preventWidows();
 });
 </script>
