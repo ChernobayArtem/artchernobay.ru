@@ -13,32 +13,38 @@
       --bg: #ffffff;
       --surface: #f8f7f4;
       --border: rgba(0,0,0,0.08);
+      --border-hover: rgba(0,0,0,0.2);
       --text: #0c0c0c;
-      --muted: #999999;
+      --text2: #444444;
+      --muted: #888888;
+      --muted2: #555555;
       --card: #fafaf7;
       --tag: #f0eeea;
       --inv: #0c0c0c;
       --invt: #ffffff;
       --nav-bg: rgba(255,255,255,0.92);
       --green: #22c55e;
+      --shadow: 0 8px 24px rgba(0,0,0,0.08);
     }
     [data-theme="dark"] {
       --bg: #0c0c0c;
       --surface: #161616;
       --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(255,255,255,0.2);
       --text: #efefef;
+      --text2: #cccccc;
       --muted: #666666;
+      --muted2: #aaaaaa;
       --card: #131313;
       --tag: #1e1e1e;
       --inv: #efefef;
       --invt: #0c0c0c;
       --nav-bg: rgba(12,12,12,0.92);
+      --shadow: 0 8px 24px rgba(0,0,0,0.35);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     html { scroll-behavior: smooth; }
-
     body {
       font-family: 'Inter', system-ui, sans-serif;
       background: var(--bg);
@@ -46,48 +52,74 @@
       transition: background .25s, color .25s;
       -webkit-font-smoothing: antialiased;
     }
-
     .sg { font-family: 'Space Grotesk', system-ui, sans-serif; }
 
     /* ---- NAV ---- */
     .nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      position: sticky; top: 0; z-index: 100;
       background: var(--nav-bg);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 0.5px solid var(--border);
       padding: 13px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
     }
 
-    .nav-logo { font-weight: 700; font-size: 15px; letter-spacing: -0.02em; color: var(--text); text-decoration: none; }
+    /* Логотип с анимацией */
+    .nav-logo {
+      position: relative;
+      font-weight: 700; font-size: 15px; letter-spacing: -0.02em;
+      color: var(--text); text-decoration: none;
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .logo-ab {
+      display: inline-block;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .logo-short { opacity: 1; transform: translateX(0); }
+    .logo-full {
+      position: absolute; left: 0; top: 0;
+      opacity: 0; transform: translateX(-5px);
+      pointer-events: none;
+    }
+    .nav-logo:hover .logo-short { opacity: 0; transform: translateX(5px); }
+    .nav-logo:hover .logo-full  { opacity: 1; transform: translateX(0); pointer-events: auto; }
 
+    /* Nav links */
     .nav-links { display: flex; gap: 24px; }
     .nav-link {
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 500;
-      text-decoration: none;
+      font-size: 13px; font-weight: 500;
+      color: var(--muted); text-decoration: none;
       transition: color .15s;
+      position: relative;
     }
+    .nav-link::after {
+      content: '';
+      position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 1px;
+      background: var(--text);
+      transition: width .2s;
+    }
+    .nav-link.active { color: var(--text); }
+    .nav-link.active::after { width: 100%; }
     .nav-link:hover { color: var(--text); }
+    .nav-link:hover::after { width: 100%; }
 
+    /* Theme toggle — контрастный */
     .theme-btn {
-      width: 32px; height: 32px;
-      border-radius: 9px;
-      border: 0.5px solid var(--border);
-      background: transparent;
+      width: 32px; height: 32px; border-radius: 9px;
+      border: none;
+      background: var(--inv); color: var(--invt);
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      color: var(--muted);
-      font-size: 15px;
-      transition: color .15s, border-color .15s;
+      font-size: 14px;
+      transition: opacity .15s, transform .1s;
+      flex-shrink: 0;
     }
-    .theme-btn:hover { color: var(--text); border-color: var(--text); }
+    .theme-btn:hover { opacity: 0.8; transform: rotate(15deg); }
 
     /* ---- WRAP ---- */
     .wrap { max-width: 1040px; margin: 0 auto; padding: 0 32px 80px; }
@@ -96,68 +128,40 @@
     .hero { padding: 64px 0 48px; }
 
     .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
+      display: inline-flex; align-items: center; gap: 7px;
       background: var(--tag);
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--muted);
-      letter-spacing: 0.04em;
-      margin-bottom: 24px;
+      border: 0.5px solid var(--border);
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 11px; font-weight: 500;
+      color: var(--muted2);
+      letter-spacing: 0.04em; margin-bottom: 24px;
     }
     .badge-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--green);
-      flex-shrink: 0;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); flex-shrink: 0;
       animation: pulse 2.5s infinite;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
 
     .hero-title {
-      font-size: 50px;
-      font-weight: 700;
-      line-height: 1.1;
-      letter-spacing: -0.035em;
-      margin-bottom: 20px;
-      color: var(--text);
+      font-size: 50px; font-weight: 700;
+      line-height: 1.1; letter-spacing: -0.035em;
+      margin-bottom: 20px; color: var(--text);
     }
     .title-inv {
-      background: var(--inv);
-      color: var(--invt);
-      padding: 2px 10px;
-      border-radius: 9px;
-      display: inline-block;
+      background: var(--inv); color: var(--invt);
+      padding: 2px 10px; border-radius: 9px; display: inline-block;
     }
-
     .hero-sub {
-      font-size: 15px;
-      color: var(--muted);
-      max-width: 450px;
-      line-height: 1.8;
-      margin-bottom: 28px;
+      font-size: 15px; color: var(--muted);
+      max-width: 450px; line-height: 1.8; margin-bottom: 28px;
     }
-
     .hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
-
     .btn {
-      padding: 10px 22px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: opacity .15s, transform .1s;
-      border: none;
+      padding: 10px 22px; border-radius: 10px;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+      transition: opacity .15s, transform .1s; border: none;
     }
     .btn:hover { opacity: 0.8; transform: translateY(-1px); }
     .btn:active { transform: translateY(0); }
@@ -168,180 +172,177 @@
     .bento {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: auto auto;
-      gap: 10px;
-      margin-bottom: 56px;
+      gap: 10px; margin-bottom: 56px;
     }
-
     .bcard {
       background: var(--card);
       border: 0.5px solid var(--border);
-      border-radius: 18px;
-      padding: 20px;
-      transition: transform .2s ease, border-color .15s;
+      border-radius: 18px; padding: 20px;
+      transition: border-color .2s, transform .2s;
     }
-    .bcard:hover { border-color: rgba(0,0,0,0.14); }
-    [data-theme="dark"] .bcard:hover { border-color: rgba(255,255,255,0.13); }
-
-    .bcard-bio { grid-row: span 2; display: flex; flex-direction: column; gap: 16px; }
+    .bcard:hover { border-color: var(--border-hover); }
+    .bcard-bio { grid-row: span 2; display: flex; flex-direction: column; gap: 16px; overflow: hidden; }
     .bcard-contacts { grid-column: span 2; }
-
     .bcard-label {
-      display: block;
-      font-size: 10px;
-      font-weight: 500;
-      color: var(--muted);
-      letter-spacing: 0.07em;
-      margin-bottom: 14px;
+      display: block; font-size: 10px; font-weight: 500;
+      color: var(--muted); letter-spacing: 0.07em; margin-bottom: 14px;
     }
 
+    /* Фото */
     .author-photo {
-      width: 100%; height: 220px;
-      border-radius: 12px;
-      object-fit: cover;
-      object-position: center top;
-      display: block;
+      width: 100%; height: 220px; border-radius: 12px;
+      object-fit: cover; object-position: center top; display: block;
     }
     .author-placeholder {
-      width: 100%; height: 220px;
-      border-radius: 12px;
+      width: 100%; height: 220px; border-radius: 12px;
       background: var(--surface);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      font-size: 40px;
-      font-weight: 700;
-      color: var(--muted);
+      display: none; align-items: center; justify-content: center;
+      font-size: 40px; font-weight: 700; color: var(--muted);
     }
 
+    /* Bio */
     .bio-name { font-weight: 600; font-size: 17px; letter-spacing: -0.02em; margin-bottom: 8px; }
-    .bio-text { font-size: 13px; color: var(--muted); line-height: 1.8; }
+    .bio-text { font-size: 13px; color: var(--text2); line-height: 1.8; }
     .bio-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
     .bio-tag {
-      padding: 3px 9px; border-radius: 6px;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px;
       font-size: 11px; font-weight: 500;
-      background: var(--tag); color: var(--muted);
+      background: var(--tag);
+      border: 0.5px solid var(--border);
+      color: var(--text2);
     }
+    .bio-tag-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
 
+    /* Опыт */
     .exp-num { font-size: 48px; font-weight: 700; letter-spacing: -0.05em; line-height: 1; }
     .exp-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
 
+    /* Работа с тултипом */
+    .bcard-work { position: relative; cursor: default; }
     .work-name { font-weight: 600; font-size: 16px; letter-spacing: -0.02em; margin-bottom: 4px; }
-    .work-role { font-size: 12px; color: var(--muted); }
+    .work-role { font-size: 12px; color: var(--text2); }
     .work-date { font-size: 11px; color: var(--muted); margin-top: 3px; }
-
-    .contact-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-    .cbtn {
-      padding: 7px 15px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 500;
-      border: 0.5px solid var(--border);
-      color: var(--text);
-      background: transparent;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      transition: opacity .15s, transform .1s;
+    .work-hint {
+      font-size: 10px; color: var(--muted); margin-top: 10px;
+      letter-spacing: 0.03em; opacity: 0.6;
     }
-    .cbtn:hover { opacity: 0.7; transform: translateY(-1px); }
-    .cbtn-inv { background: var(--inv); color: var(--invt); border: none; }
+
+    .work-tooltip {
+      position: absolute;
+      top: calc(100% + 10px); left: 0;
+      width: 230px;
+      background: var(--bg);
+      border: 0.5px solid var(--border);
+      border-radius: 14px; padding: 16px;
+      box-shadow: var(--shadow);
+      opacity: 0; transform: translateY(-6px);
+      pointer-events: none;
+      transition: opacity .2s, transform .2s;
+      z-index: 50;
+    }
+    .bcard-work:hover .work-tooltip {
+      opacity: 1; transform: translateY(0); pointer-events: auto;
+    }
+    .wt-logo {
+      width: 28px; height: 28px; border-radius: 7px;
+      background: var(--inv); color: var(--invt);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; margin-bottom: 10px;
+    }
+    .wt-name { font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+    .wt-desc { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 10px; }
+    .wt-link {
+      font-size: 12px; font-weight: 500; color: var(--text);
+      text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+      border-bottom: 0.5px solid var(--border);
+      padding-bottom: 1px;
+      transition: border-color .15s;
+    }
+    .wt-link:hover { border-color: var(--text); }
+
+    /* Контакты — мини-карточки */
+    .contacts-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .ccard {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 12px; padding: 14px 14px 12px;
+      text-decoration: none; color: var(--text);
+      display: flex; flex-direction: column; gap: 3px;
+      cursor: pointer; font-family: inherit; text-align: left;
+      transition: border-color .15s, transform .15s;
+    }
+    .ccard:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+    .ccard-main { grid-column: span 2; }
+    .ccard-icon { font-size: 16px; color: var(--muted); margin-bottom: 6px; line-height: 1; }
+    .ccard-title { font-size: 13px; font-weight: 600; }
+    .ccard-sub { font-size: 11px; color: var(--muted); }
+    .ccard-action {
+      font-size: 11px; color: var(--muted);
+      margin-top: 8px; display: inline-flex; align-items: center; gap: 3px;
+    }
+    .ccard-dim { opacity: 0.6; }
     .cbtn-copied { color: #16a34a !important; border-color: #16a34a !important; }
 
     /* ---- CASES ---- */
     .cases-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 18px;
     }
     .cases-label { font-size: 10px; font-weight: 500; color: var(--muted); letter-spacing: 0.07em; }
-
     .tabs {
       display: flex; gap: 3px;
-      background: var(--tag);
-      border-radius: 10px;
-      padding: 3px;
+      background: var(--tag); border-radius: 10px; padding: 3px;
     }
     .tab-btn {
-      padding: 5px 16px;
-      border-radius: 7px;
-      font-size: 12px;
-      font-weight: 500;
-      border: none;
-      cursor: pointer;
-      background: transparent;
-      color: var(--muted);
-      transition: all .15s;
-      font-family: inherit;
+      padding: 5px 16px; border-radius: 7px;
+      font-size: 12px; font-weight: 500;
+      border: none; cursor: pointer;
+      background: transparent; color: var(--muted);
+      transition: all .15s; font-family: inherit;
     }
     .tab-btn.active {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg); color: var(--text);
       box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     }
-
-    .cases-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
+    .cases-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
     .case-card {
-      background: var(--card);
-      border: 0.5px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-      cursor: pointer;
+      background: var(--card); border: 0.5px solid var(--border);
+      border-radius: 14px; overflow: hidden; cursor: pointer;
       transition: transform .2s ease, border-color .15s;
     }
-    .case-card:hover { transform: translateY(-4px); }
-    [data-theme="dark"] .case-card:hover { border-color: rgba(255,255,255,0.13); }
-
+    .case-card:hover { transform: translateY(-4px); border-color: var(--border-hover); }
     .case-preview {
-      height: 148px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      height: 148px; display: flex; align-items: center; justify-content: center;
     }
     .case-preview-lbl {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.07em;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
       font-family: 'Space Grotesk', sans-serif;
     }
-
     .case-info { padding: 13px 15px 15px; }
     .case-title { font-weight: 600; font-size: 13px; letter-spacing: -0.01em; margin-bottom: 3px; }
     .case-sub { font-size: 11px; color: var(--muted); margin-bottom: 9px; }
     .case-tag {
-      display: inline-block;
-      font-size: 10px; padding: 3px 8px;
+      display: inline-block; font-size: 10px; padding: 3px 8px;
       border-radius: 5px; font-weight: 500;
-      background: var(--tag); color: var(--muted);
-      letter-spacing: 0.03em;
+      background: var(--tag); color: var(--muted); letter-spacing: 0.03em;
     }
 
     /* ---- FOOTER ---- */
     .footer {
-      margin-top: 64px;
-      padding-top: 22px;
+      margin-top: 64px; padding-top: 22px;
       border-top: 0.5px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      text-align: center;
     }
-    .footer-logo { font-weight: 600; font-size: 13px; letter-spacing: -0.02em; }
-    .footer-loc { font-size: 11px; color: var(--muted); }
+    .footer-copy { font-size: 12px; color: var(--muted); font-weight: 400; }
 
     /* ---- ANIMATIONS ---- */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .fu { animation: fadeUp .55s ease both; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .fu  { animation: fadeUp .55s ease both; }
     .fu1 { animation-delay: .08s; }
     .fu2 { animation-delay: .18s; }
     .fu3 { animation-delay: .28s; }
@@ -354,14 +355,16 @@
       .bento { grid-template-columns: 1fr 1fr; }
       .bcard-bio { grid-row: span 1; grid-column: span 2; }
       .bcard-contacts { grid-column: span 2; }
-      .cases-grid { grid-template-columns: repeat(2, 1fr); }
+      .cases-grid { grid-template-columns: repeat(2,1fr); }
+      .contacts-grid { grid-template-columns: repeat(2,1fr); }
+      .ccard-main { grid-column: span 2; }
     }
     @media (max-width: 480px) {
       .hero-title { font-size: 28px; }
       .bento { grid-template-columns: 1fr; }
-      .bcard-bio { grid-column: span 1; }
-      .bcard-contacts { grid-column: span 1; }
-      .cases-grid { grid-template-columns: 1fr; }
+      .bcard-bio,.bcard-contacts { grid-column: span 1; }
+      .cases-grid,.contacts-grid { grid-template-columns: 1fr; }
+      .ccard-main { grid-column: span 1; }
       .nav-links { display: none; }
     }
   </style>
@@ -369,11 +372,14 @@
 <body>
 
 <nav class="nav">
-  <a href="#" class="sg nav-logo">АЧ</a>
+  <a href="#" class="sg nav-logo" id="navLogo">
+    <span class="logo-ab logo-short">АЧ</span>
+    <span class="logo-ab logo-full">Артём Чернобай</span>
+  </a>
   <div class="nav-links">
-    <a href="#about" class="nav-link">Обо мне</a>
-    <a href="#cases" class="nav-link">Работы</a>
-    <a href="#contact" class="nav-link">Контакт</a>
+    <a href="#about"   class="nav-link active" data-section="about">Обо мне</a>
+    <a href="#cases"   class="nav-link"        data-section="cases">Работы</a>
+    <a href="#contact" class="nav-link"        data-section="contact">Контакт</a>
   </div>
   <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="Сменить тему">
     <i class="ti ti-moon" id="themeIcon"></i>
@@ -393,7 +399,7 @@
       для сложных систем
     </h1>
     <p class="hero-sub fu fu2">
-      Проектирую интерфейсы для сложных систем — там, где данные, процессы и люди пересекаются. Начинаю с «Почему?», а не «Как?».
+      Проектирую интерфейсы для сложных систем — там, где данные, процессы и&nbsp;люди пересекаются. Начинаю с «Почему?», а&nbsp;не «Как?».
     </p>
     <div class="hero-btns fu fu3">
       <a href="#cases" class="btn btn-inv sg">Смотреть работы</a>
@@ -402,55 +408,73 @@
   </section>
 
   <section class="bento">
+    <!-- Фото + биография -->
     <div class="bcard bcard-bio">
-      <img
-        src="author_photo.jpg"
-        alt="Артём Чернобай"
-        class="author-photo"
-        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-      >
+      <img src="author_photo.jpg" alt="Артём Чернобай" class="author-photo"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
       <div class="author-placeholder sg">АЧ</div>
       <div>
         <div class="sg bio-name">Артём Чернобай</div>
-        <div class="bio-text">Проектирую интерфейсы для сложных систем — там, где данные, процессы и люди пересекаются.</div>
+        <div class="bio-text">Проектирую интерфейсы для сложных систем — там, где данные, процессы и&nbsp;люди пересекаются.</div>
       </div>
       <div class="bio-tags">
-        <span class="bio-tag">UX/UI</span>
-        <span class="bio-tag">B2B/B2G</span>
-        <span class="bio-tag">Blender</span>
+        <span class="bio-tag"><span class="bio-tag-dot" style="background:#3b82f6"></span>UX/UI</span>
+        <span class="bio-tag"><span class="bio-tag-dot" style="background:#22c55e"></span>B2B/B2G</span>
+        <span class="bio-tag"><span class="bio-tag-dot" style="background:#f97316"></span>Blender</span>
       </div>
     </div>
 
+    <!-- Опыт — динамический -->
     <div class="bcard">
       <span class="bcard-label">ОПЫТ</span>
-      <div class="sg exp-num">4+</div>
-      <div class="exp-sub">лет в дизайне</div>
+      <div class="sg exp-num" id="expYears">4+</div>
+      <div class="exp-sub">лет в&nbsp;дизайне</div>
     </div>
 
-    <div class="bcard">
+    <!-- Текущая работа с тултипом -->
+    <div class="bcard bcard-work">
       <span class="bcard-label">СЕЙЧАС</span>
       <div class="sg work-name">Notamedia</div>
       <div class="work-role">Ведущий дизайнер</div>
       <div class="work-date">с янв. 2024</div>
+      <div class="work-hint">наведи, чтобы узнать больше</div>
+      <div class="work-tooltip">
+        <div class="wt-logo sg">NM</div>
+        <div class="wt-name">Notamedia</div>
+        <div class="wt-desc">ИТ-интегратор. Корпоративные порталы и&nbsp;B2G-системы для госзаказчиков.</div>
+        <a href="https://notamedia.ru" target="_blank" rel="noopener" class="wt-link">
+          Сайт компании <i class="ti ti-arrow-up-right"></i>
+        </a>
+      </div>
     </div>
 
+    <!-- Контакты — мини-карточки -->
     <div class="bcard bcard-contacts" id="contact">
       <span class="bcard-label">КОНТАКТ</span>
-      <div class="contact-btns">
-        <a href="https://t.me/ArtChernobay" target="_blank" rel="noopener" class="cbtn">
-          <i class="ti ti-brand-telegram"></i> Telegram
+      <div class="contacts-grid">
+        <a href="https://t.me/ArtChernobay" target="_blank" rel="noopener" class="ccard ccard-main">
+          <div class="ccard-icon"><i class="ti ti-brand-telegram"></i></div>
+          <div class="ccard-title">Telegram</div>
+          <div class="ccard-sub">@ArtChernobay</div>
+          <span class="ccard-action">Написать <i class="ti ti-arrow-right" style="font-size:10px"></i></span>
         </a>
-        <a href="https://dribbble.com/artemchernobay" target="_blank" rel="noopener" class="cbtn">
-          <i class="ti ti-brand-dribbble"></i> Dribbble
-        </a>
-        <a href="https://www.behance.net/artemchernobay" target="_blank" rel="noopener" class="cbtn">
-          <i class="ti ti-brand-behance"></i> Behance
-        </a>
-        <button class="cbtn" id="emailBtn" onclick="copyEmail()">
-          <i class="ti ti-mail"></i> Email
+        <button class="ccard" id="emailBtn" onclick="copyEmail()">
+          <div class="ccard-icon"><i class="ti ti-mail"></i></div>
+          <div class="ccard-title">Email</div>
+          <div class="ccard-sub" id="emailSub">Нажми, скопирую</div>
         </button>
-        <a href="cv.pdf" download="CV_Artyom_Chernobay.pdf" class="cbtn cbtn-inv">
-          <i class="ti ti-download"></i> Скачать CV
+        <a href="https://dribbble.com/artemchernobay" target="_blank" rel="noopener" class="ccard">
+          <div class="ccard-icon"><i class="ti ti-brand-dribbble"></i></div>
+          <div class="ccard-title">Dribbble</div>
+        </a>
+        <a href="https://www.behance.net/artemchernobay" target="_blank" rel="noopener" class="ccard">
+          <div class="ccard-icon"><i class="ti ti-brand-behance"></i></div>
+          <div class="ccard-title">Behance</div>
+        </a>
+        <a href="cv.pdf" download="CV_Artyom_Chernobay.pdf" class="ccard ccard-dim">
+          <div class="ccard-icon"><i class="ti ti-file-cv"></i></div>
+          <div class="ccard-title">Резюме</div>
+          <div class="ccard-sub">PDF</div>
         </a>
       </div>
     </div>
@@ -460,52 +484,54 @@
     <div class="cases-header">
       <span class="cases-label">ПРОЕКТЫ</span>
       <div class="tabs">
-        <button class="tab-btn active" onclick="filterCases('all', this)">Все</button>
-        <button class="tab-btn" onclick="filterCases('mobile', this)">Мобилки</button>
-        <button class="tab-btn" onclick="filterCases('3d', this)">3D</button>
+        <button class="tab-btn active" onclick="filterCases('all',this)">Все</button>
+        <button class="tab-btn" onclick="filterCases('mobile',this)">Мобилки</button>
+        <button class="tab-btn" onclick="filterCases('3d',this)">3D</button>
       </div>
     </div>
     <div class="cases-grid" id="casesGrid"></div>
   </section>
 
   <footer class="footer">
-    <span class="sg footer-logo">АЧ · 2025</span>
-    <span class="footer-loc">Москва, Россия</span>
+    <div class="footer-copy">
+      Портфолио Чернобай Артёма · <span id="footerYear"></span> · Москва, Россия
+    </div>
   </footer>
 
 </div>
 
 <script>
 const CASES = [
-  {cat:'mobile', title:'Listy', sub:'Мобильное приложение для совместных покупок', lbg:'#dbeafe', dbg:'#1e3a5f'},
-  {cat:'mobile', title:'Продуктовый подход', sub:'Продуктовый подход к дизайну мобильного приложения', lbg:'#dcfce7', dbg:'#14532d'},
-  {cat:'mobile', title:'Avio', sub:'Мобильное приложение по покупке авиабилетов', lbg:'#ede9fe', dbg:'#2e1065'},
-  {cat:'mobile', title:'DryClean', sub:'Мобильное приложение для сети химчисток', lbg:'#fef3c7', dbg:'#451a03'},
-  {cat:'mobile', title:'Onboarding & What\'s new', sub:'UX/UI-дизайн', lbg:'#fce7f3', dbg:'#500724'},
-  {cat:'3d', title:'NOT A ROBOT', sub:'Blender · Лоу-поли', lbg:'#f1f5f9', dbg:'#0f172a'},
-  {cat:'3d', title:'NOT A PLANE', sub:'Blender · Лоу-поли', lbg:'#e0f2fe', dbg:'#082f49'},
-  {cat:'3d', title:'Pixel Flag', sub:'Blender · Лоу-поли', lbg:'#fff7ed', dbg:'#431407'},
-  {cat:'3d', title:'NOT A HOUSE', sub:'Blender · Диорама', lbg:'#f0fdf4', dbg:'#052e16'},
-  {cat:'3d', title:'Ruins', sub:'Blender · Диорама', lbg:'#fdf4ff', dbg:'#3b0764'},
-  {cat:'3d', title:'Coffee Shop', sub:'Blender · Диорама', lbg:'#fff8f0', dbg:'#3b1500'},
-  {cat:'3d', title:'Bedroom', sub:'Blender · Диорама', lbg:'#f5f0ff', dbg:'#2d003a'},
-  {cat:'3d', title:'Presents', sub:'Blender · Сцена', lbg:'#fff0f0', dbg:'#3a0000'},
-  {cat:'3d', title:'Hawaiian Island', sub:'Blender · Сцена', lbg:'#ecfdf5', dbg:'#003a1a'},
-  {cat:'3d', title:'Forest Road', sub:'Blender · Сцена', lbg:'#f0fdf0', dbg:'#003a00'},
-  {cat:'3d', title:'Donuts', sub:'Blender · Сцена', lbg:'#fff0f8', dbg:'#3a0025'},
+  {cat:'mobile',title:'Listy',sub:'Мобильное приложение для совместных покупок',lbg:'#dbeafe',dbg:'#1e3a5f'},
+  {cat:'mobile',title:'Продуктовый подход',sub:'Продуктовый подход к дизайну мобильного приложения',lbg:'#dcfce7',dbg:'#14532d'},
+  {cat:'mobile',title:'Avio',sub:'Мобильное приложение по покупке авиабилетов',lbg:'#ede9fe',dbg:'#2e1065'},
+  {cat:'mobile',title:'DryClean',sub:'Мобильное приложение для сети химчисток',lbg:'#fef3c7',dbg:'#451a03'},
+  {cat:'mobile',title:"Onboarding & What's new",sub:'UX/UI-дизайн',lbg:'#fce7f3',dbg:'#500724'},
+  {cat:'3d',title:'NOT A ROBOT',sub:'Blender · Лоу-поли',lbg:'#f1f5f9',dbg:'#0f172a'},
+  {cat:'3d',title:'NOT A PLANE',sub:'Blender · Лоу-поли',lbg:'#e0f2fe',dbg:'#082f49'},
+  {cat:'3d',title:'Pixel Flag',sub:'Blender · Лоу-поли',lbg:'#fff7ed',dbg:'#431407'},
+  {cat:'3d',title:'NOT A HOUSE',sub:'Blender · Диорама',lbg:'#f0fdf4',dbg:'#052e16'},
+  {cat:'3d',title:'Ruins',sub:'Blender · Диорама',lbg:'#fdf4ff',dbg:'#3b0764'},
+  {cat:'3d',title:'Coffee Shop',sub:'Blender · Диорама',lbg:'#fff8f0',dbg:'#3b1500'},
+  {cat:'3d',title:'Bedroom',sub:'Blender · Диорама',lbg:'#f5f0ff',dbg:'#2d003a'},
+  {cat:'3d',title:'Presents',sub:'Blender · Сцена',lbg:'#fff0f0',dbg:'#3a0000'},
+  {cat:'3d',title:'Hawaiian Island',sub:'Blender · Сцена',lbg:'#ecfdf5',dbg:'#003a1a'},
+  {cat:'3d',title:'Forest Road',sub:'Blender · Сцена',lbg:'#f0fdf0',dbg:'#003a00'},
+  {cat:'3d',title:'Donuts',sub:'Blender · Сцена',lbg:'#fff0f8',dbg:'#3a0025'},
 ];
 
 let theme = 'light';
 let activeTab = 'all';
 
+/* ---- Рендер кейсов ---- */
 function renderCases(tab) {
   const grid = document.getElementById('casesGrid');
-  const isDark = theme === 'dark';
+  const dark = theme === 'dark';
   const list = tab === 'all' ? CASES : CASES.filter(c => c.cat === tab);
   grid.innerHTML = list.map(c => `
     <div class="case-card">
-      <div class="case-preview" style="background:${isDark ? c.dbg : c.lbg}">
-        <span class="case-preview-lbl" style="color:${isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.13)'}">${c.title.toUpperCase()}</span>
+      <div class="case-preview" style="background:${dark ? c.dbg : c.lbg}">
+        <span class="case-preview-lbl" style="color:${dark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.13)'}">${c.title.toUpperCase()}</span>
       </div>
       <div class="case-info">
         <div class="sg case-title">${c.title}</div>
@@ -523,6 +549,7 @@ function filterCases(tab, btn) {
   renderCases(tab);
 }
 
+/* ---- Тема ---- */
 function toggleTheme() {
   theme = theme === 'light' ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
@@ -530,19 +557,81 @@ function toggleTheme() {
   renderCases(activeTab);
 }
 
+/* ---- Email ---- */
 function copyEmail() {
   navigator.clipboard.writeText('artyom.chernobay@outlook.com').then(() => {
     const btn = document.getElementById('emailBtn');
-    btn.innerHTML = '<i class="ti ti-check"></i> Скопировано';
+    const sub = document.getElementById('emailSub');
+    sub.textContent = 'Скопировано!';
     btn.classList.add('cbtn-copied');
     setTimeout(() => {
-      btn.innerHTML = '<i class="ti ti-mail"></i> Email';
+      sub.textContent = 'Нажми, скопирую';
       btn.classList.remove('cbtn-copied');
     }, 2200);
   });
 }
 
-renderCases('all');
+/* ---- Динамический опыт ---- */
+function updateExperience() {
+  const start = new Date('2022-01-01');
+  const years = Math.floor((new Date() - start) / (365.25 * 24 * 60 * 60 * 1000));
+  document.getElementById('expYears').textContent = years + '+';
+}
+
+/* ---- Год в футере ---- */
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+/* ---- Анимация логотипа ---- */
+function initLogo() {
+  const logo = document.getElementById('navLogo');
+  const shortEl = logo.querySelector('.logo-short');
+  const fullEl  = logo.querySelector('.logo-full');
+  logo.style.width = shortEl.offsetWidth + 'px';
+  logo.addEventListener('mouseenter', () => {
+    logo.style.width = fullEl.offsetWidth + 'px';
+  });
+  logo.addEventListener('mouseleave', () => {
+    logo.style.width = shortEl.offsetWidth + 'px';
+  });
+}
+
+/* ---- Активный пункт меню при скролле ---- */
+function initNavObserver() {
+  const sections = document.querySelectorAll('section[id], div[id="contact"]');
+  const links = document.querySelectorAll('.nav-link');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const target = document.querySelector(`.nav-link[data-section="${e.target.id}"]`);
+        if (target) target.classList.add('active');
+      }
+    });
+  }, { threshold: 0.4, rootMargin: '-80px 0px -40% 0px' });
+  sections.forEach(s => obs.observe(s));
+}
+
+/* ---- Висячие союзы ---- */
+function preventWidows() {
+  const els = document.querySelectorAll('p, .bio-text, .case-sub, .wt-desc, .footer-copy');
+  const shorts = /\s(и|в|с|на|по|к|из|до|за|от|со|под|над|при|для|не|но|а|о|у)\s/gi;
+  els.forEach(el => {
+    el.childNodes.forEach(node => {
+      if (node.nodeType === 3) {
+        node.textContent = node.textContent.replace(shorts, (m, w) => ` ${w}\u00A0`);
+      }
+    });
+  });
+}
+
+/* ---- Init ---- */
+document.addEventListener('DOMContentLoaded', () => {
+  renderCases('all');
+  updateExperience();
+  initLogo();
+  initNavObserver();
+  preventWidows();
+});
 </script>
 </body>
 </html>
