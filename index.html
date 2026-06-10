@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Артём Чернобай — UX/UI-дизайнер</title>
+  <meta name="description" content="Артём Чернобай — ведущий UX/UI-дизайнер. Проектирую интерфейсы для сложных B2B/B2G-систем.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #f8f7f4;
+      --border: rgba(0,0,0,0.08);
+      --text: #0c0c0c;
+      --muted: #999999;
+      --card: #fafaf7;
+      --tag: #f0eeea;
+      --inv: #0c0c0c;
+      --invt: #ffffff;
+      --nav-bg: rgba(255,255,255,0.92);
+      --green: #22c55e;
+    }
+    [data-theme="dark"] {
+      --bg: #0c0c0c;
+      --surface: #161616;
+      --border: rgba(255,255,255,0.07);
+      --text: #efefef;
+      --muted: #666666;
+      --card: #131313;
+      --tag: #1e1e1e;
+      --inv: #efefef;
+      --invt: #0c0c0c;
+      --nav-bg: rgba(12,12,12,0.92);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background .25s, color .25s;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .sg { font-family: 'Space Grotesk', system-ui, sans-serif; }
+
+    /* ---- NAV ---- */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--nav-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 0.5px solid var(--border);
+      padding: 13px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo { font-weight: 700; font-size: 15px; letter-spacing: -0.02em; color: var(--text); text-decoration: none; }
+
+    .nav-links { display: flex; gap: 24px; }
+    .nav-link {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+      text-decoration: none;
+      transition: color .15s;
+    }
+    .nav-link:hover { color: var(--text); }
+
+    .theme-btn {
+      width: 32px; height: 32px;
+      border-radius: 9px;
+      border: 0.5px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted);
+      font-size: 15px;
+      transition: color .15s, border-color .15s;
+    }
+    .theme-btn:hover { color: var(--text); border-color: var(--text); }
+
+    /* ---- WRAP ---- */
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 32px 80px; }
+
+    /* ---- HERO ---- */
+    .hero { padding: 64px 0 48px; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--tag);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      margin-bottom: 24px;
+    }
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+      animation: pulse 2.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero-title {
+      font-size: 50px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.035em;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+    .title-inv {
+      background: var(--inv);
+      color: var(--invt);
+      padding: 2px 10px;
+      border-radius: 9px;
+      display: inline-block;
+    }
+
+    .hero-sub {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 450px;
+      line-height: 1.8;
+      margin-bottom: 28px;
+    }
+
+    .hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .btn {
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity .15s, transform .1s;
+      border: none;
+    }
+    .btn:hover { opacity: 0.8; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-inv { background: var(--inv); color: var(--invt); }
+    .btn-out { background: transparent; color: var(--text); border: 0.5px solid var(--border); }
+
+    /* ---- BENTO ---- */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto auto;
+      gap: 10px;
+      margin-bottom: 56px;
+    }
+
+    .bcard {
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      transition: transform .2s ease, border-color .15s;
+    }
+    .bcard:hover { border-color: rgba(0,0,0,0.14); }
+    [data-theme="dark"] .bcard:hover { border-color: rgba(255,255,255,0.13); }
+
+    .bcard-bio { grid-row: span 2; display: flex; flex-direction: column; gap: 16px; }
+    .bcard-contacts { grid-column: span 2; }
+
+    .bcard-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.07em;
+      margin-bottom: 14px;
+    }
+
+    .author-photo {
+      width: 100%; height: 220px;
+      border-radius: 12px;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    .author-placeholder {
+      width: 100%; height: 220px;
+      border-radius: 12px;
+      background: var(--surface);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .bio-name { font-weight: 600; font-size: 17px; letter-spacing: -0.02em; margin-bottom: 8px; }
+    .bio-text { font-size: 13px; color: var(--muted); line-height: 1.8; }
+    .bio-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; }
+    .bio-tag {
+      padding: 3px 9px; border-radius: 6px;
+      font-size: 11px; font-weight: 500;
+      background: var(--tag); color: var(--muted);
+    }
+
+    .exp-num { font-size: 48px; font-weight: 700; letter-spacing: -0.05em; line-height: 1; }
+    .exp-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    .work-name { font-weight: 600; font-size: 16px; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .work-role { font-size: 12px; color: var(--muted); }
+    .work-date { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    .contact-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .cbtn {
+      padding: 7px 15px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 0.5px solid var(--border);
+      color: var(--text);
+      background: transparent;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: opacity .15s, transform .1s;
+    }
+    .cbtn:hover { opacity: 0.7; transform: translateY(-1px); }
+    .cbtn-inv { background: var(--inv); color: var(--invt); border: none; }
+    .cbtn-copied { color: #16a34a !important; border-color: #16a34a !important; }
+
+    /* ---- CASES ---- */
+    .cases-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .cases-label { font-size: 10px; font-weight: 500; color: var(--muted); letter-spacing: 0.07em; }
+
+    .tabs {
+      display: flex; gap: 3px;
+      background: var(--tag);
+      border-radius: 10px;
+      padding: 3px;
+    }
+    .tab-btn {
+      padding: 5px 16px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      color: var(--muted);
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .tab-btn.active {
+      background: var(--bg);
+      color: var(--text);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    .cases-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .case-card {
+      background: var(--card);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .2s ease, border-color .15s;
+    }
+    .case-card:hover { transform: translateY(-4px); }
+    [data-theme="dark"] .case-card:hover { border-color: rgba(255,255,255,0.13); }
+
+    .case-preview {
+      height: 148px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .case-preview-lbl {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .case-info { padding: 13px 15px 15px; }
+    .case-title { font-weight: 600; font-size: 13px; letter-spacing: -0.01em; margin-bottom: 3px; }
+    .case-sub { font-size: 11px; color: var(--muted); margin-bottom: 9px; }
+    .case-tag {
+      display: inline-block;
+      font-size: 10px; padding: 3px 8px;
+      border-radius: 5px; font-weight: 500;
+      background: var(--tag); color: var(--muted);
+      letter-spacing: 0.03em;
+    }
+
+    /* ---- FOOTER ---- */
+    .footer {
+      margin-top: 64px;
+      padding-top: 22px;
+      border-top: 0.5px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-logo { font-weight: 600; font-size: 13px; letter-spacing: -0.02em; }
+    .footer-loc { font-size: 11px; color: var(--muted); }
+
+    /* ---- ANIMATIONS ---- */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fu { animation: fadeUp .55s ease both; }
+    .fu1 { animation-delay: .08s; }
+    .fu2 { animation-delay: .18s; }
+    .fu3 { animation-delay: .28s; }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 768px) {
+      .nav { padding: 12px 18px; }
+      .wrap { padding: 0 18px 60px; }
+      .hero-title { font-size: 34px; }
+      .bento { grid-template-columns: 1fr 1fr; }
+      .bcard-bio { grid-row: span 1; grid-column: span 2; }
+      .bcard-contacts { grid-column: span 2; }
+      .cases-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .hero-title { font-size: 28px; }
+      .bento { grid-template-columns: 1fr; }
+      .bcard-bio { grid-column: span 1; }
+      .bcard-contacts { grid-column: span 1; }
+      .cases-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#" class="sg nav-logo">АЧ</a>
+  <div class="nav-links">
+    <a href="#about" class="nav-link">Обо мне</a>
+    <a href="#cases" class="nav-link">Работы</a>
+    <a href="#contact" class="nav-link">Контакт</a>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="Сменить тему">
+    <i class="ti ti-moon" id="themeIcon"></i>
+  </button>
+</nav>
+
+<div class="wrap">
+
+  <section class="hero" id="about">
+    <div class="hero-badge fu">
+      <span class="badge-dot"></span>
+      UX/UI-дизайнер · Москва · открыт к предложениям
+    </div>
+    <h1 class="sg hero-title fu fu1">
+      Привет, я <span class="title-inv">Артём</span> —<br>
+      делаю интерфейсы<br>
+      для сложных систем
+    </h1>
+    <p class="hero-sub fu fu2">
+      Проектирую интерфейсы для сложных систем — там, где данные, процессы и люди пересекаются. Начинаю с «Почему?», а не «Как?».
+    </p>
+    <div class="hero-btns fu fu3">
+      <a href="#cases" class="btn btn-inv sg">Смотреть работы</a>
+      <a href="https://t.me/ArtChernobay" target="_blank" rel="noopener" class="btn btn-out sg">Написать</a>
+    </div>
+  </section>
+
+  <section class="bento">
+    <div class="bcard bcard-bio">
+      <img
+        src="author_photo.jpg"
+        alt="Артём Чернобай"
+        class="author-photo"
+        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+      >
+      <div class="author-placeholder sg">АЧ</div>
+      <div>
+        <div class="sg bio-name">Артём Чернобай</div>
+        <div class="bio-text">Проектирую интерфейсы для сложных систем — там, где данные, процессы и люди пересекаются.</div>
+      </div>
+      <div class="bio-tags">
+        <span class="bio-tag">UX/UI</span>
+        <span class="bio-tag">B2B/B2G</span>
+        <span class="bio-tag">Blender</span>
+      </div>
+    </div>
+
+    <div class="bcard">
+      <span class="bcard-label">ОПЫТ</span>
+      <div class="sg exp-num">4+</div>
+      <div class="exp-sub">лет в дизайне</div>
+    </div>
+
+    <div class="bcard">
+      <span class="bcard-label">СЕЙЧАС</span>
+      <div class="sg work-name">Notamedia</div>
+      <div class="work-role">Ведущий дизайнер</div>
+      <div class="work-date">с янв. 2024</div>
+    </div>
+
+    <div class="bcard bcard-contacts" id="contact">
+      <span class="bcard-label">КОНТАКТ</span>
+      <div class="contact-btns">
+        <a href="https://t.me/ArtChernobay" target="_blank" rel="noopener" class="cbtn">
+          <i class="ti ti-brand-telegram"></i> Telegram
+        </a>
+        <a href="https://dribbble.com/artemchernobay" target="_blank" rel="noopener" class="cbtn">
+          <i class="ti ti-brand-dribbble"></i> Dribbble
+        </a>
+        <a href="https://www.behance.net/artemchernobay" target="_blank" rel="noopener" class="cbtn">
+          <i class="ti ti-brand-behance"></i> Behance
+        </a>
+        <button class="cbtn" id="emailBtn" onclick="copyEmail()">
+          <i class="ti ti-mail"></i> Email
+        </button>
+        <a href="cv.pdf" download="CV_Artyom_Chernobay.pdf" class="cbtn cbtn-inv">
+          <i class="ti ti-download"></i> Скачать CV
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="cases">
+    <div class="cases-header">
+      <span class="cases-label">ПРОЕКТЫ</span>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="filterCases('all', this)">Все</button>
+        <button class="tab-btn" onclick="filterCases('mobile', this)">Мобилки</button>
+        <button class="tab-btn" onclick="filterCases('3d', this)">3D</button>
+      </div>
+    </div>
+    <div class="cases-grid" id="casesGrid"></div>
+  </section>
+
+  <footer class="footer">
+    <span class="sg footer-logo">АЧ · 2025</span>
+    <span class="footer-loc">Москва, Россия</span>
+  </footer>
+
+</div>
+
+<script>
+const CASES = [
+  {cat:'mobile', title:'Listy', sub:'Мобильное приложение для совместных покупок', lbg:'#dbeafe', dbg:'#1e3a5f'},
+  {cat:'mobile', title:'Продуктовый подход', sub:'Продуктовый подход к дизайну мобильного приложения', lbg:'#dcfce7', dbg:'#14532d'},
+  {cat:'mobile', title:'Avio', sub:'Мобильное приложение по покупке авиабилетов', lbg:'#ede9fe', dbg:'#2e1065'},
+  {cat:'mobile', title:'DryClean', sub:'Мобильное приложение для сети химчисток', lbg:'#fef3c7', dbg:'#451a03'},
+  {cat:'mobile', title:'Onboarding & What\'s new', sub:'UX/UI-дизайн', lbg:'#fce7f3', dbg:'#500724'},
+  {cat:'3d', title:'NOT A ROBOT', sub:'Blender · Лоу-поли', lbg:'#f1f5f9', dbg:'#0f172a'},
+  {cat:'3d', title:'NOT A PLANE', sub:'Blender · Лоу-поли', lbg:'#e0f2fe', dbg:'#082f49'},
+  {cat:'3d', title:'Pixel Flag', sub:'Blender · Лоу-поли', lbg:'#fff7ed', dbg:'#431407'},
+  {cat:'3d', title:'NOT A HOUSE', sub:'Blender · Диорама', lbg:'#f0fdf4', dbg:'#052e16'},
+  {cat:'3d', title:'Ruins', sub:'Blender · Диорама', lbg:'#fdf4ff', dbg:'#3b0764'},
+  {cat:'3d', title:'Coffee Shop', sub:'Blender · Диорама', lbg:'#fff8f0', dbg:'#3b1500'},
+  {cat:'3d', title:'Bedroom', sub:'Blender · Диорама', lbg:'#f5f0ff', dbg:'#2d003a'},
+  {cat:'3d', title:'Presents', sub:'Blender · Сцена', lbg:'#fff0f0', dbg:'#3a0000'},
+  {cat:'3d', title:'Hawaiian Island', sub:'Blender · Сцена', lbg:'#ecfdf5', dbg:'#003a1a'},
+  {cat:'3d', title:'Forest Road', sub:'Blender · Сцена', lbg:'#f0fdf0', dbg:'#003a00'},
+  {cat:'3d', title:'Donuts', sub:'Blender · Сцена', lbg:'#fff0f8', dbg:'#3a0025'},
+];
+
+let theme = 'light';
+let activeTab = 'all';
+
+function renderCases(tab) {
+  const grid = document.getElementById('casesGrid');
+  const isDark = theme === 'dark';
+  const list = tab === 'all' ? CASES : CASES.filter(c => c.cat === tab);
+  grid.innerHTML = list.map(c => `
+    <div class="case-card">
+      <div class="case-preview" style="background:${isDark ? c.dbg : c.lbg}">
+        <span class="case-preview-lbl" style="color:${isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.13)'}">${c.title.toUpperCase()}</span>
+      </div>
+      <div class="case-info">
+        <div class="sg case-title">${c.title}</div>
+        <div class="case-sub">${c.sub}</div>
+        <span class="case-tag">${c.cat === 'mobile' ? 'Мобилка' : '3D · Blender'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterCases(tab, btn) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCases(tab);
+}
+
+function toggleTheme() {
+  theme = theme === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+  document.getElementById('themeIcon').className = theme === 'dark' ? 'ti ti-sun' : 'ti ti-moon';
+  renderCases(activeTab);
+}
+
+function copyEmail() {
+  navigator.clipboard.writeText('artyom.chernobay@outlook.com').then(() => {
+    const btn = document.getElementById('emailBtn');
+    btn.innerHTML = '<i class="ti ti-check"></i> Скопировано';
+    btn.classList.add('cbtn-copied');
+    setTimeout(() => {
+      btn.innerHTML = '<i class="ti ti-mail"></i> Email';
+      btn.classList.remove('cbtn-copied');
+    }, 2200);
+  });
+}
+
+renderCases('all');
+</script>
+</body>
+</html>
