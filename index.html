@@ -127,9 +127,9 @@
     .bcard:hover{border-color:var(--border-hover);box-shadow:var(--shadow)}
     .bcard-bio{grid-row:span 2;display:flex;flex-direction:column;gap:16px;overflow:hidden}
     .bcard-contacts{grid-column:span 2;display:flex;flex-direction:column}
-    .bcard-label{display:block;font-size:10px;font-weight:500;color:var(--muted);letter-spacing:.07em;margin-bottom:14px}
+    .bcard-label{display:block;font-size:10px;font-weight:500;color:var(--muted);letter-spacing:.07em;margin-bottom:14px;line-height:1.2}
 
-    .author-photo{width:100%;height:170px;border-radius:12px;object-fit:cover;object-position:center 30%;display:block}
+    .author-photo{width:100%;height:170px;border-radius:12px;object-fit:cover;object-position:center 45%;display:block}
     .author-placeholder{width:100%;height:170px;border-radius:12px;background:var(--surface);display:none;align-items:center;justify-content:center;font-size:40px;font-weight:700;color:var(--muted)}
 
     .bio-name{font-weight:600;font-size:17px;letter-spacing:-.02em;margin-bottom:8px}
@@ -145,6 +145,63 @@
     .exp-num{font-size:48px;font-weight:700;letter-spacing:-.05em;line-height:1}
     .exp-sub{font-size:12px;color:var(--muted);margin-top:6px}
 
+    /* Карточка опыта — crossfade внутри карточки */
+    .bcard-exp{position:relative;cursor:default;overflow:hidden}
+    .exp-content{position:relative;min-height:90px}
+    .exp-default{
+      transition:opacity .3s ease,transform .3s ease;
+    }
+    .exp-hover{
+      position:absolute;inset:0;
+      opacity:0;transform:translateY(6px);pointer-events:none;
+      transition:opacity .3s ease,transform .3s ease;
+      overflow-y:auto;overscroll-behavior:contain;
+      scrollbar-width:thin;scrollbar-color:var(--border-hover) transparent;
+    }
+    .exp-hover::-webkit-scrollbar{width:3px}
+    .exp-hover::-webkit-scrollbar-track{background:transparent}
+    .exp-hover::-webkit-scrollbar-thumb{background:var(--border-hover);border-radius:3px}
+    .exp-hover::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+    .bcard-exp:hover .exp-default{opacity:0;transform:translateY(-6px)}
+    .bcard-exp:hover .exp-hover{opacity:1;transform:translateY(0);pointer-events:auto}
+
+    .exp-timeline{position:relative;padding-left:14px}
+    .exp-timeline::before{
+      content:'';position:absolute;left:3px;top:5px;
+      width:1px;height:calc(100% - 10px);
+      background:var(--border);
+      transform:scaleY(0);transform-origin:top;
+      transition:transform 0s .3s; /* мгновенный сброс при уходе мыши */
+    }
+    .bcard-exp:hover .exp-timeline::before{
+      transform:scaleY(1);
+      transition:transform .9s cubic-bezier(0.4,0,0.2,1) .25s;
+    }
+    .exp-item{
+      position:relative;display:flex;gap:8px;align-items:baseline;
+      padding-bottom:8px;
+      opacity:0;transform:translateX(-4px);
+      transition:opacity .35s ease,transform .35s ease;
+    }
+    .exp-item:last-child{padding-bottom:0}
+    .exp-item::before{
+      content:'';position:absolute;left:-14px;top:5px;
+      width:5px;height:5px;border-radius:50%;
+      background:var(--text);border:1.5px solid var(--bg);box-sizing:content-box;
+    }
+    .exp-year{
+      font-family:'Space Grotesk',sans-serif;
+      font-size:11px;font-weight:700;color:var(--text);
+      letter-spacing:-.01em;flex-shrink:0;min-width:32px;
+    }
+    .exp-text{font-size:11px;color:var(--muted);line-height:1.4}
+
+    .bcard-exp:hover .exp-item:nth-child(1){opacity:1;transform:translateX(0);transition-delay:.25s}
+    .bcard-exp:hover .exp-item:nth-child(2){opacity:1;transform:translateX(0);transition-delay:.42s}
+    .bcard-exp:hover .exp-item:nth-child(3){opacity:1;transform:translateX(0);transition-delay:.59s}
+    .bcard-exp:hover .exp-item:nth-child(4){opacity:1;transform:translateX(0);transition-delay:.76s}
+    .bcard-exp:hover .exp-item:nth-child(5){opacity:1;transform:translateX(0);transition-delay:.93s}
+
     /* scroll-margin-top — навбар не наезжает на контент */
     #cases{scroll-margin-top:62px}
     #contactCard{scroll-margin-top:62px}
@@ -152,6 +209,27 @@
     /* Тултип работы */
     .bcard-work{position:relative;cursor:default;overflow:visible;will-change:auto;transform-style:flat;z-index:1}
     .bcard-work:hover{z-index:200}
+
+    /* Мини-табы Сейчас/Ранее — стиль как nav-link, выровнены с bcard-label */
+    .work-tabs{display:flex;gap:14px;margin-bottom:14px;line-height:1.2}
+    .work-tab{
+      padding:0;border:none;cursor:pointer;
+      background:transparent;color:var(--muted);font-family:inherit;
+      font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;
+      position:relative;transition:color .15s;line-height:1.2;display:block;
+    }
+    .work-tab::after{
+      content:'';position:absolute;bottom:-3px;left:0;
+      width:0;height:1px;background:var(--text);transition:width .2s;
+    }
+    .work-tab.active{color:var(--text)}
+    .work-tab.active::after,.work-tab:hover::after{width:100%}
+    .work-tab:hover{color:var(--text)}
+
+    /* Панели */
+    .work-pane{display:none}
+    .work-pane.active{display:block;animation:paneIn .25s ease}
+    @keyframes paneIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
     .work-name{font-weight:600;font-size:16px;letter-spacing:-.02em;margin-bottom:12px}
     .work-role{font-size:12px;color:var(--text2)}
     .work-date{font-size:11px;color:var(--muted);margin-top:3px}
@@ -173,15 +251,16 @@
       content:'';position:absolute;top:-20px;left:100%;
       width:14px;height:calc(100% + 40px);
     }
-    .bcard-work:hover .work-tooltip{opacity:1;transform:translateX(0);pointer-events:auto}
+    .bcard-work:hover .work-pane.active .work-tooltip{opacity:1;transform:translateX(0);pointer-events:auto}
 
     /* адаптив — тултип снизу */
     @media(max-width:900px){
       .bcard-work::after{display:none}
       .work-tooltip{top:calc(100% + 10px);left:0;width:100%;transform:translateY(-6px)}
-      .bcard-work:hover .work-tooltip{transform:translateY(0)}
+      .bcard-work:hover .work-pane.active .work-tooltip{transform:translateY(0)}
     }
     .wt-logo{width:28px;height:28px;border-radius:7px;background:var(--inv);color:var(--invt);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-bottom:10px}
+    .wt-logo-img{width:28px;height:28px;border-radius:7px;object-fit:cover;display:block;margin-bottom:10px}
     .wt-name{font-size:13px;font-weight:600;margin-bottom:5px}
     .wt-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px}
     .wt-link{font-size:12px;font-weight:500;color:var(--text);text-decoration:none;display:inline-flex;align-items:center;gap:4px;border-bottom:0.5px solid var(--border);padding-bottom:1px;transition:border-color .15s}
@@ -454,25 +533,75 @@
       </div>
     </div>
 
-    <div class="bcard reveal" style="transition-delay:.07s">
+    <div class="bcard bcard-exp reveal" style="transition-delay:.07s">
       <span class="bcard-label">ОПЫТ</span>
-      <div class="sg exp-num" id="expYears">4+</div>
-      <div class="exp-sub">лет в&nbsp;дизайне</div>
+      <div class="exp-content">
+        <div class="exp-default">
+          <div class="sg exp-num" id="expYears">4+</div>
+          <div class="exp-sub">лет в&nbsp;дизайне</div>
+        </div>
+        <div class="exp-hover">
+          <div class="exp-timeline" id="expTimeline">
+            <div class="exp-item">
+              <div class="exp-year">2022</div>
+              <div class="exp-text">Курсы по&nbsp;дизайну</div>
+            </div>
+            <div class="exp-item">
+              <div class="exp-year">2023</div>
+              <div class="exp-text">Работа в&nbsp;агентстве</div>
+            </div>
+            <div class="exp-item">
+              <div class="exp-year">2024</div>
+              <div class="exp-text">Начало работы в&nbsp;Интеграторе</div>
+            </div>
+            <div class="exp-item">
+              <div class="exp-year">2025</div>
+              <div class="exp-text">Развитие 2&nbsp;крупных интранет-систем</div>
+            </div>
+            <div class="exp-item">
+              <div class="exp-year">2026</div>
+              <div class="exp-text">Рефакторинг легаси-системы</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="bcard bcard-work reveal" style="transition-delay:.14s">
       <i class="ti ti-arrow-up-right work-arrow"></i>
-      <span class="bcard-label">СЕЙЧАС</span>
-      <div class="sg work-name">Notamedia</div>
-      <div class="work-role">Ведущий дизайнер</div>
-      <div class="work-date">с янв. 2024</div>
-      <div class="work-tooltip">
-        <div class="wt-logo sg">NM</div>
-        <div class="wt-name">Notamedia</div>
-        <div class="wt-desc">Интранет-системы для государственных заказчиков</div>
-        <a href="https://integrator.nota.media" target="_blank" rel="noopener" class="wt-link">
-          Сайт компании <i class="ti ti-arrow-up-right"></i>
-        </a>
+      <div class="work-tabs">
+        <button class="work-tab active" onclick="switchWork('now',this)">Сейчас</button>
+        <button class="work-tab" onclick="switchWork('before',this)">Ранее</button>
+      </div>
+
+      <!-- Сейчас -->
+      <div class="work-pane active" id="workNow">
+        <div class="sg work-name">Notamedia</div>
+        <div class="work-role">Ведущий дизайнер</div>
+        <div class="work-date">с янв. 2024</div>
+        <div class="work-tooltip">
+          <img src="https://www.google.com/s2/favicons?domain=integrator.nota.media&sz=64" alt="Notamedia" class="wt-logo-img">
+          <div class="wt-name">Notamedia</div>
+          <div class="wt-desc">Интранет-системы для государственных заказчиков</div>
+          <a href="https://integrator.nota.media" target="_blank" rel="noopener" class="wt-link">
+            Сайт компании <i class="ti ti-arrow-up-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Ранее -->
+      <div class="work-pane" id="workBefore">
+        <div class="sg work-name">Дюшес</div>
+        <div class="work-role">UX/UI-дизайнер</div>
+        <div class="work-date">нояб. 2022 — 2023</div>
+        <div class="work-tooltip">
+          <img src="https://www.google.com/s2/favicons?domain=dbranding.ru&sz=64" alt="Дюшес" class="wt-logo-img">
+          <div class="wt-name">Дюшес</div>
+          <div class="wt-desc">Брендинговое агентство</div>
+          <a href="https://dbranding.ru" target="_blank" rel="noopener" class="wt-link">
+            Сайт компании <i class="ti ti-arrow-up-right"></i>
+          </a>
+        </div>
       </div>
     </div>
 
@@ -656,6 +785,14 @@ function toggleTheme(){
   renderCases(activeTab);
 }
 
+/* Переключение Сейчас/Ранее в карточке работы */
+function switchWork(pane,btn){
+  document.querySelectorAll('.work-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.work-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById(pane==='now'?'workNow':'workBefore').classList.add('active');
+}
+
 function copyEmail(){
   const email='artyom.chernobay@outlook.com';
 
@@ -793,9 +930,9 @@ function initReveal(){
   document.querySelectorAll('.bcard.reveal').forEach(el=>obs.observe(el));
 }
 
-/* 3D tilt на bcard (кроме bcard-work — иначе ломается тултип) */
+/* 3D tilt на bcard (кроме bcard-work и bcard-exp — у них тултипы) */
 function initTilt(){
-  document.querySelectorAll('.bcard:not(.bcard-work)').forEach(card=>{
+  document.querySelectorAll('.bcard:not(.bcard-work):not(.bcard-exp)').forEach(card=>{
     card.addEventListener('mousemove',e=>{
       const r=card.getBoundingClientRect();
       const x=(e.clientX-r.left)/r.width-.5;
