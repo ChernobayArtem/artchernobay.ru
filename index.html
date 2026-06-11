@@ -94,20 +94,30 @@
 
     .hero-title{font-size:50px;font-weight:700;line-height:1.1;letter-spacing:-.035em;margin-bottom:20px;color:var(--text)}
     .title-inv{background:var(--inv);color:var(--invt);padding:2px 10px;border-radius:9px;display:inline-block}
-    .hero-sub{font-size:15px;color:var(--muted);max-width:460px;line-height:1.8;margin-bottom:28px}
+    .hero-sub{font-size:15px;color:var(--muted);max-width:560px;line-height:1.8;margin-bottom:28px}
     .hero-btns{display:flex;gap:10px;flex-wrap:wrap}
     .btn{
       padding:10px 22px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;
       text-decoration:none;display:inline-flex;align-items:center;gap:6px;
-      transition:transform .15s,box-shadow .15s,opacity .15s;border:none;
+      transition:transform .2s,box-shadow .2s,color .22s;border:none;
+      position:relative;overflow:hidden;
+    }
+    .btn::before{
+      content:'';position:absolute;inset:0;opacity:0;
+      transition:opacity .22s;border-radius:inherit;
     }
     .btn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
     .btn:active{transform:translateY(0)}
     .btn-inv{background:var(--inv);color:var(--invt)}
+    .btn-inv::before{background:rgba(255,255,255,0.1)}
+    .btn-inv:hover::before{opacity:1}
     .btn-out{background:transparent;color:var(--text);border:0.5px solid var(--border)}
+    .btn-out::before{display:none}
+    .btn-out:hover{color:var(--text);border-color:var(--text);box-shadow:none}
+    .btn span,.btn i{position:relative;z-index:1}
 
     /* BENTO */
-    .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:56px}
+    .bento{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:10px;margin-bottom:56px}
     .bcard{
       background:var(--card);border:0.5px solid var(--border);border-radius:18px;padding:20px;
       transition:border-color .2s,transform .15s,box-shadow .2s;
@@ -115,11 +125,11 @@
     }
     .bcard:hover{border-color:var(--border-hover);box-shadow:var(--shadow)}
     .bcard-bio{grid-row:span 2;display:flex;flex-direction:column;gap:16px;overflow:hidden}
-    .bcard-contacts{grid-column:span 2}
+    .bcard-contacts{grid-column:span 2;display:flex;flex-direction:column}
     .bcard-label{display:block;font-size:10px;font-weight:500;color:var(--muted);letter-spacing:.07em;margin-bottom:14px}
 
-    .author-photo{width:100%;height:220px;border-radius:12px;object-fit:cover;object-position:center top;display:block}
-    .author-placeholder{width:100%;height:220px;border-radius:12px;background:var(--surface);display:none;align-items:center;justify-content:center;font-size:40px;font-weight:700;color:var(--muted)}
+    .author-photo{width:100%;height:170px;border-radius:12px;object-fit:cover;object-position:center top;display:block}
+    .author-placeholder{width:100%;height:170px;border-radius:12px;background:var(--surface);display:none;align-items:center;justify-content:center;font-size:40px;font-weight:700;color:var(--muted)}
 
     .bio-name{font-weight:600;font-size:17px;letter-spacing:-.02em;margin-bottom:8px}
     .bio-text{font-size:13px;color:var(--text2);line-height:1.5}
@@ -139,7 +149,8 @@
     #contactCard{scroll-margin-top:62px}
 
     /* Тултип работы */
-    .bcard-work{position:relative;cursor:default;overflow:visible;will-change:auto;transform-style:flat}
+    .bcard-work{position:relative;cursor:default;overflow:visible;will-change:auto;transform-style:flat;z-index:1}
+    .bcard-work:hover{z-index:200}
     .work-name{font-weight:600;font-size:16px;letter-spacing:-.02em;margin-bottom:12px}
     .work-role{font-size:12px;color:var(--text2)}
     .work-date{font-size:11px;color:var(--muted);margin-top:3px}
@@ -151,12 +162,24 @@
     }
     .bcard-work:hover .work-arrow{opacity:1;color:var(--text)}
     .work-tooltip{
-      position:absolute;top:calc(100% + 10px);left:0;width:230px;
+      position:absolute;top:-1px;left:calc(100% + 12px);width:230px;
       background:var(--bg);border:0.5px solid var(--border);border-radius:14px;padding:16px;
-      box-shadow:var(--shadow-lg);opacity:0;transform:translateY(-6px);pointer-events:none;
+      box-shadow:var(--shadow-lg);opacity:0;transform:translateX(-8px);pointer-events:none;
       transition:opacity .2s,transform .2s;z-index:50;
     }
-    .bcard-work:hover .work-tooltip{opacity:1;transform:translateY(0);pointer-events:auto}
+    /* прозрачный мост — чтобы мышь не слетала при переходе к тултипу */
+    .bcard-work::after{
+      content:'';position:absolute;top:-20px;left:100%;
+      width:14px;height:calc(100% + 40px);
+    }
+    .bcard-work:hover .work-tooltip{opacity:1;transform:translateX(0);pointer-events:auto}
+
+    /* адаптив — тултип снизу */
+    @media(max-width:900px){
+      .bcard-work::after{display:none}
+      .work-tooltip{top:calc(100% + 10px);left:0;width:100%;transform:translateY(-6px)}
+      .bcard-work:hover .work-tooltip{transform:translateY(0)}
+    }
     .wt-logo{width:28px;height:28px;border-radius:7px;background:var(--inv);color:var(--invt);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-bottom:10px}
     .wt-name{font-size:13px;font-weight:600;margin-bottom:5px}
     .wt-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px}
@@ -164,16 +187,16 @@
     .wt-link:hover{border-color:var(--text)}
 
     /* Контакты — одна строка, все одинаковые */
-    .contacts-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+    .contacts-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;flex:1;align-items:stretch}
     .ccard{
       background:var(--surface);border:0.5px solid var(--border);
-      border-radius:12px;padding:14px 12px 12px;
+      border-radius:12px;padding:14px 12px 8px;
       text-decoration:none;color:var(--text);
       display:flex;flex-direction:column;gap:3px;
       cursor:pointer;font-family:inherit;text-align:left;
       transition:border-color .15s,transform .15s,box-shadow .15s;
     }
-    .ccard:hover{border-color:var(--border-hover);transform:translateY(-3px);box-shadow:var(--shadow)}
+    .ccard:hover{border-color:var(--border-hover);box-shadow:var(--shadow)}
     .ccard-telegram{background:rgba(0,136,204,0.07);border-color:rgba(0,136,204,0.25)}
     .ccard-telegram:hover{border-color:rgba(0,136,204,0.55);background:rgba(0,136,204,0.12)}
     .ccard-telegram .ccard-icon{color:var(--tg)}
@@ -181,7 +204,7 @@
     .ccard-icon{font-size:16px;color:var(--muted);margin-bottom:6px;line-height:1}
     .ccard-title{font-size:13px;font-weight:600}
     .ccard-sub{font-size:11px;color:var(--muted)}
-    .ccard-action{font-size:11px;color:var(--muted);margin-top:6px;display:inline-flex;align-items:center;gap:3px}
+    .ccard-action{font-size:11px;color:var(--muted);margin-top:auto;display:inline-flex;align-items:center;gap:3px}
     .ccard-dim{opacity:.55}
     .cbtn-copied .ccard-sub{color:#16a34a}
 
@@ -200,19 +223,34 @@
     .tabs{display:flex;gap:3px;background:var(--tag);border-radius:10px;padding:3px}
     .tab-btn{padding:5px 16px;border-radius:7px;font-size:12px;font-weight:500;border:none;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;font-family:inherit}
     .tab-btn.active{background:var(--bg);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.1)}
-    .cases-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .cases-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
     .case-card{background:var(--card);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .2s ease,border-color .15s,box-shadow .2s}
     .case-card:hover{transform:translateY(-5px);border-color:var(--border-hover);box-shadow:var(--shadow)}
-    .case-preview{height:148px;display:flex;align-items:center;justify-content:center}
+    .case-preview{height:300px;display:flex;align-items:center;justify-content:center}
     .case-preview-lbl{font-size:11px;font-weight:600;letter-spacing:.07em;font-family:'Space Grotesk',sans-serif}
-    .case-info{padding:13px 15px 15px}
-    .case-title{font-weight:600;font-size:13px;letter-spacing:-.01em;margin-bottom:3px}
-    .case-sub{font-size:11px;color:var(--muted);margin-bottom:9px}
-    .case-tag{display:inline-block;font-size:10px;padding:3px 8px;border-radius:5px;font-weight:500;background:var(--tag);color:var(--muted);letter-spacing:.03em}
+    .case-info{padding:14px 15px 15px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .case-info-left{display:flex;flex-direction:column;gap:7px}
+    .case-title{font-weight:600;font-size:13px;letter-spacing:-.01em}
+    .case-sub{font-size:11px;color:var(--muted)}
+    .case-tag{display:inline-block;font-size:10px;padding:3px 8px;border-radius:5px;font-weight:500;background:var(--tag);color:var(--muted);letter-spacing:.03em;white-space:nowrap;flex-shrink:0}
 
     /* Scroll reveal */
     .reveal{opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease}
     .reveal.visible{opacity:1;transform:translateY(0)}
+
+    /* Infinite scroll loader */
+    .cases-sentinel{height:1px;grid-column:1/-1}
+    .cases-loader{
+      grid-column:1/-1;display:flex;justify-content:center;align-items:center;
+      padding:24px 0;gap:6px;
+    }
+    .cases-loader span{
+      width:6px;height:6px;border-radius:50%;background:var(--muted);
+      animation:loaderDot 1.2s ease-in-out infinite;
+    }
+    .cases-loader span:nth-child(2){animation-delay:.2s}
+    .cases-loader span:nth-child(3){animation-delay:.4s}
+    @keyframes loaderDot{0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1);opacity:1}}
 
     /* FOOTER */
     .footer{margin-top:64px;padding-top:22px;border-top:0.5px solid var(--border);text-align:center}
@@ -242,7 +280,33 @@
     .fu{animation:fadeUp .55s ease both}
     .fu1{animation-delay:.08s}.fu2{animation-delay:.18s}.fu3{animation-delay:.28s}
 
-    /* RESPONSIVE */
+    /* PRELOADER */
+    .preloader{
+      position:fixed;inset:0;z-index:9999;
+      background:var(--bg);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+      transition:transform .7s cubic-bezier(0.76,0,0.24,1),opacity .4s ease;
+    }
+    .preloader.hide{transform:translateY(-100%);opacity:0;pointer-events:none}
+    .preloader-name{
+      font-family:'Space Grotesk',system-ui,sans-serif;
+      font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--text);
+      overflow:hidden;
+    }
+    .preloader-name span{
+      display:inline-block;
+      opacity:0;transform:translateY(20px);
+      transition:opacity .4s ease,transform .4s ease;
+    }
+    .preloader-bar{
+      width:40px;height:1.5px;background:var(--border);border-radius:2px;overflow:hidden;
+      margin-top:4px;
+    }
+    .preloader-bar-fill{
+      height:100%;width:0%;background:var(--text);
+      transition:width .6s cubic-bezier(0.4,0,0.2,1);
+    }
+    body.loading{overflow:hidden}
     @media(max-width:768px){
       .nav{padding:12px 18px}
       .wrap{padding:0 18px 60px}
@@ -262,7 +326,12 @@
     }
   </style>
 </head>
-<body>
+<body class="loading">
+
+<div class="preloader" id="preloader">
+  <div class="preloader-name" id="preloaderName"></div>
+  <div class="preloader-bar"><div class="preloader-bar-fill" id="preloaderFill"></div></div>
+</div>
 
 <nav class="nav">
   <a href="#" class="sg nav-logo" id="navLogo">
@@ -275,8 +344,8 @@
   </a>
   <div class="nav-links">
     <a href="#about"   class="nav-link active" data-section="about">Обо мне</a>
-    <a href="#cases"   class="nav-link"        data-section="cases">Работы</a>
     <a href="#contact" class="nav-link"        data-section="contact">Контакты</a>
+    <a href="#cases"   class="nav-link"        data-section="cases">Работы</a>
   </div>
   <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="Сменить тему">
     <i class="ti ti-moon" id="themeIcon"></i>
@@ -288,7 +357,7 @@
   <section class="hero" id="about">
     <div class="hero-badge fu">
       <span class="badge-dot"></span>
-      UX/UI-дизайнер · открыт к предложениям
+      UX/UI-дизайнер
     </div>
     <h1 class="sg hero-title fu fu1">
       Привет, я <span class="title-inv">Артём</span> —<br>
@@ -296,11 +365,11 @@
       для сложных систем
     </h1>
     <p class="hero-sub fu fu2">
-      Превращаю сложные процессы в понятные интерфейсы. Работаю с&nbsp;B2B/B2G-продуктами, где каждое решение нужно обосновать.
+      Превращаю сложные процессы в&nbsp;понятные интерфейсы.<br>Работаю с&nbsp;B2B/B2G-продуктами, где каждое решение нужно обосновать
     </p>
     <div class="hero-btns fu fu3">
-      <a href="#cases" class="btn btn-inv sg">Смотреть работы</a>
-      <a href="https://t.me/ArtChernobay" target="_blank" rel="noopener" class="btn btn-out sg">Написать</a>
+      <a href="#cases" class="btn btn-inv sg"><span>Смотреть работы</span></a>
+      <a href="https://t.me/ArtChernobay" target="_blank" rel="noopener" class="btn btn-out sg"><span>Написать</span></a>
     </div>
   </section>
 
@@ -335,7 +404,7 @@
       <div class="work-tooltip">
         <div class="wt-logo sg">NM</div>
         <div class="wt-name">Notamedia</div>
-        <div class="wt-desc">ИТ-интегратор. Корпоративные порталы и&nbsp;B2G-системы для&nbsp;госзаказчиков.</div>
+        <div class="wt-desc">Интранет-системы для государственных заказчиков</div>
         <a href="https://notamedia.ru" target="_blank" rel="noopener" class="wt-link">
           Сайт компании <i class="ti ti-arrow-up-right"></i>
         </a>
@@ -348,7 +417,6 @@
         <a href="https://t.me/ArtChernobay" target="_blank" rel="noopener" class="ccard ccard-telegram">
           <div class="ccard-icon"><i class="ti ti-brand-telegram"></i></div>
           <div class="ccard-title">Telegram</div>
-          <div class="ccard-sub">@ArtChernobay</div>
           <span class="ccard-action">Написать <i class="ti ti-arrow-right" style="font-size:9px"></i></span>
         </a>
         <button class="ccard" id="emailBtn" onclick="copyEmail()">
@@ -359,15 +427,17 @@
         <a href="https://dribbble.com/artemchernobay" target="_blank" rel="noopener" class="ccard">
           <div class="ccard-icon"><i class="ti ti-brand-dribbble"></i></div>
           <div class="ccard-title">Dribbble</div>
+          <span class="ccard-action">Немного шотов</span>
         </a>
         <a href="https://www.behance.net/artemchernobay" target="_blank" rel="noopener" class="ccard">
           <div class="ccard-icon"><i class="ti ti-brand-behance"></i></div>
           <div class="ccard-title">Behance</div>
+          <span class="ccard-action">Все мои проекты</span>
         </a>
         <a href="cv.pdf" download="CV_Artyom_Chernobay.pdf" class="ccard">
           <div class="ccard-icon"><i class="ti ti-file-cv"></i></div>
           <div class="ccard-title">Резюме</div>
-          <div class="ccard-sub">PDF</div>
+          <span class="ccard-action">Скачать в PDF</span>
         </a>
       </div>
     </div>
@@ -415,29 +485,96 @@ const CASES=[
 
 let theme='light',activeTab='all';
 
-function renderCases(tab){
-  const grid=document.getElementById('casesGrid');
-  const dark=theme==='dark';
-  const list=tab==='all'?CASES:CASES.filter(c=>c.cat===tab);
-  grid.innerHTML=list.map(c=>`
-    <div class="case-card reveal">
-      <div class="case-preview" style="background:${dark?c.dbg:c.lbg}">
-        <span class="case-preview-lbl" style="color:${dark?'rgba(255,255,255,0.18)':'rgba(0,0,0,0.13)'}">${c.title.toUpperCase()}</span>
-      </div>
-      <div class="case-info">
+const PAGE_SIZE=4; // карточек за один раз
+let infiniteObs=null;  // IntersectionObserver для подгрузки
+let currentList=[];    // текущий отфильтрованный список
+let loadedCount=0;     // сколько уже показано
+
+function makeCard(c,tab,delay){
+  return `<div class="case-card reveal" style="transition-delay:${delay}s">
+    <div class="case-preview" style="background:${theme==='dark'?c.dbg:c.lbg}">
+      <span class="case-preview-lbl" style="color:${theme==='dark'?'rgba(255,255,255,0.18)':'rgba(0,0,0,0.13)'}">${c.title.toUpperCase()}</span>
+    </div>
+    <div class="case-info">
+      <div class="case-info-left">
         <div class="sg case-title">${c.title}</div>
         <div class="case-sub">${c.sub}</div>
-        <span class="case-tag">${c.cat==='mobile'?'Мобилка':'3D · Blender'}</span>
       </div>
+      ${tab==='all'?`<span class="case-tag">${c.cat==='mobile'?'Мобилка':'3D · Blender'}</span>`:''}
     </div>
-  `).join('');
-  // reveal после рендера
+  </div>`;
+}
+
+function revealNewCards(grid){
   requestAnimationFrame(()=>{
-    grid.querySelectorAll('.reveal').forEach((el,i)=>{
-      el.style.transitionDelay=`${i*0.04}s`;
+    grid.querySelectorAll('.reveal:not(.visible)').forEach((el,i)=>{
+      el.style.transitionDelay=`${i*0.06}s`;
       setTimeout(()=>el.classList.add('visible'),20);
     });
   });
+}
+
+function loadMore(){
+  const grid=document.getElementById('casesGrid');
+  const sentinel=document.getElementById('casesSentinel');
+  const batch=currentList.slice(loadedCount,loadedCount+PAGE_SIZE);
+  if(!batch.length)return;
+
+  // убираем loader и sentinel на время вставки
+  const loader=document.getElementById('casesLoader');
+  if(loader)loader.remove();
+  if(sentinel)sentinel.remove();
+
+  batch.forEach((c,i)=>{
+    grid.insertAdjacentHTML('beforeend',makeCard(c,activeTab,i*0.06));
+  });
+  loadedCount+=batch.length;
+
+  revealNewCards(grid);
+
+  // если ещё есть карточки — вешаем sentinel обратно
+  if(loadedCount<currentList.length){
+    grid.insertAdjacentHTML('beforeend',
+      `<div class="cases-loader" id="casesLoader"><span></span><span></span><span></span></div>
+       <div class="cases-sentinel" id="casesSentinel"></div>`
+    );
+    // наблюдаем за sentinel
+    if(infiniteObs){
+      const newSentinel=document.getElementById('casesSentinel');
+      if(newSentinel)infiniteObs.observe(newSentinel);
+    }
+  }
+}
+
+function renderCases(tab){
+  // сбрасываем observer
+  if(infiniteObs){infiniteObs.disconnect();infiniteObs=null;}
+
+  currentList=tab==='all'?CASES:CASES.filter(c=>c.cat===tab);
+  loadedCount=0;
+
+  const grid=document.getElementById('casesGrid');
+  grid.innerHTML='';
+
+  // первый пакет
+  const first=currentList.slice(0,PAGE_SIZE);
+  first.forEach((c,i)=>{
+    grid.insertAdjacentHTML('beforeend',makeCard(c,tab,i*0.06));
+  });
+  loadedCount=first.length;
+  revealNewCards(grid);
+
+  // если карточек больше — добавляем sentinel
+  if(loadedCount<currentList.length){
+    grid.insertAdjacentHTML('beforeend',
+      `<div class="cases-loader" id="casesLoader"><span></span><span></span><span></span></div>
+       <div class="cases-sentinel" id="casesSentinel"></div>`
+    );
+    infiniteObs=new IntersectionObserver(entries=>{
+      if(entries[0].isIntersecting) loadMore();
+    },{rootMargin:'0px 0px 120px 0px'});
+    infiniteObs.observe(document.getElementById('casesSentinel'));
+  }
 }
 
 function filterCases(tab,btn){
@@ -455,13 +592,40 @@ function toggleTheme(){
 }
 
 function copyEmail(){
-  navigator.clipboard.writeText('artyom.chernobay@outlook.com').then(()=>{
+  const email='artyom.chernobay@outlook.com';
+
+  function showCopied(){
     const btn=document.getElementById('emailBtn');
+    const icon=btn.querySelector('.ccard-icon i');
     const sub=document.getElementById('emailSub');
-    sub.textContent='Скопировано!';
-    btn.classList.add('cbtn-copied');
-    setTimeout(()=>{sub.textContent='Нажми, скопирую';btn.classList.remove('cbtn-copied')},2200);
-  });
+    icon.className='ti ti-check';
+    icon.style.color='#16a34a';
+    sub.textContent='Скопировано';
+    sub.style.color='#16a34a';
+    setTimeout(()=>{
+      icon.className='ti ti-mail';
+      icon.style.color='';
+      sub.textContent='Нажми, скопирую';
+      sub.style.color='';
+    },2200);
+  }
+
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(email).then(showCopied).catch(()=>fallbackCopy(email,showCopied));
+  } else {
+    fallbackCopy(email,showCopied);
+  }
+}
+
+function fallbackCopy(text,cb){
+  const ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.cssText='position:fixed;opacity:0;pointer-events:none';
+  document.body.appendChild(ta);
+  ta.focus();ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta);
+  cb();
 }
 
 /* Динамический опыт */
@@ -473,16 +637,46 @@ function updateExp(){
 /* Год футера */
 document.getElementById('footerYear').textContent=new Date().getFullYear();
 
-/* Nav: клик + "Обо мне" → scroll top + highlight контактов */
+/* Навигация: ручной скролл + scroll listener (без IntersectionObserver) */
+const NAV_OFFSET=80; // высота навбара + запас
+let isProgrammaticScroll=false;
+let scrollLockTimer=null;
+
+function setActiveLink(section){
+  document.querySelectorAll('.nav-link').forEach(l=>{
+    l.classList.toggle('active',l.dataset.section===section);
+  });
+}
+
+function scrollToSection(section){
+  isProgrammaticScroll=true;
+  clearTimeout(scrollLockTimer);
+
+  let targetY=0;
+  if(section==='about'){
+    targetY=0;
+  }else{
+    const idMap={cases:'cases',contact:'contactCard'};
+    const el=document.getElementById(idMap[section]);
+    if(el){
+      targetY=el.getBoundingClientRect().top+window.scrollY-NAV_OFFSET;
+    }
+  }
+
+  window.scrollTo({top:targetY,behavior:'smooth'});
+
+  // блокируем scroll-listener пока идёт плавная прокрутка
+  scrollLockTimer=setTimeout(()=>{isProgrammaticScroll=false},900);
+}
+
+/* Перехватываем клики по nav */
 document.querySelectorAll('.nav-link').forEach(link=>{
   link.addEventListener('click',function(e){
-    document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
-    this.classList.add('active');
+    e.preventDefault();
     const sec=this.dataset.section;
-    if(sec==='about'){
-      e.preventDefault();
-      window.scrollTo({top:0,behavior:'smooth'});
-    }
+    setActiveLink(sec);
+    scrollToSection(sec);
+
     if(sec==='contact'){
       const card=document.getElementById('contactCard');
       card.classList.remove('contact-highlight');
@@ -493,22 +687,36 @@ document.querySelectorAll('.nav-link').forEach(link=>{
   });
 });
 
-/* IntersectionObserver — активный пункт меню при скролле */
-function initNavObserver(){
-  const map={about:'about',cases:'cases',contactCard:'contact'};
-  const sections=['about','cases','contactCard'].map(id=>document.getElementById(id)).filter(Boolean);
-  const obs=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        const sec=map[e.target.id];
-        document.querySelectorAll('.nav-link').forEach(l=>{
-          l.classList.toggle('active',l.dataset.section===sec);
-        });
-      }
-    });
-  },{threshold:0.25,rootMargin:'-62px 0px -30% 0px'});
-  sections.forEach(s=>obs.observe(s));
+/* При скролле — определяем активную секцию по позиции */
+function updateActiveOnScroll(){
+  if(isProgrammaticScroll)return;
+
+  const y=window.scrollY;
+  if(y<50){setActiveLink('about');return}
+
+  // собираем секции, сортируем по реальной позиции в документе
+  const sections=[
+    {key:'about',    top:0},
+    {key:'contact',  top:document.getElementById('contactCard')?.offsetTop||0},
+    {key:'cases',    top:document.getElementById('cases')?.offsetTop||0},
+  ].sort((a,b)=>a.top-b.top);
+
+  // активна последняя секция, верх которой уже прокручен выше середины экрана
+  let active=sections[0].key;
+  for(const s of sections){
+    if(y+NAV_OFFSET>=s.top-20) active=s.key;
+  }
+  setActiveLink(active);
 }
+
+let scrollRaf=null;
+window.addEventListener('scroll',()=>{
+  if(scrollRaf)return;
+  scrollRaf=requestAnimationFrame(()=>{
+    updateActiveOnScroll();
+    scrollRaf=null;
+  });
+},{passive:true});
 
 /* Scroll reveal */
 function initReveal(){
@@ -533,18 +741,7 @@ function initTilt(){
   });
 }
 
-/* Magnetic кнопки */
-function initMagnetic(){
-  document.querySelectorAll('.btn').forEach(btn=>{
-    btn.addEventListener('mousemove',e=>{
-      const r=btn.getBoundingClientRect();
-      const x=(e.clientX-r.left-r.width/2)*.18;
-      const y=(e.clientY-r.top-r.height/2)*.18;
-      btn.style.transform=`translate(${x}px,${y}px) translateY(-2px)`;
-    });
-    btn.addEventListener('mouseleave',()=>{btn.style.transform=''});
-  });
-}
+/* Magnetic кнопки — убраны, заменены на CSS fill */
 
 /* Висячие союзы */
 function preventWidows(){
@@ -580,15 +777,54 @@ function initLogo(){
   logo.addEventListener('mouseleave',()=>{logo.style.width=shortEl.offsetWidth+'px'});
 }
 
+/* Прелоадер */
+(function(){
+  const name='Артём Чернобай';
+  const el=document.getElementById('preloaderName');
+  const fill=document.getElementById('preloaderFill');
+
+  // разбиваем на буквы
+  el.innerHTML=name.split('').map(ch=>
+    ch===' '
+      ? '<span style="width:.3em;display:inline-block">&nbsp;</span>'
+      : `<span>${ch}</span>`
+  ).join('');
+
+  const letters=[...el.querySelectorAll('span')];
+
+  // появление букв по очереди
+  letters.forEach((s,i)=>{
+    setTimeout(()=>{
+      s.style.opacity='1';
+      s.style.transform='translateY(0)';
+    },80+i*40);
+  });
+
+  // линия прогресса
+  setTimeout(()=>{ fill.style.width='100%'; },120);
+
+  // уход прелоадера
+  function hidePreloader(){
+    document.getElementById('preloader').classList.add('hide');
+    document.body.classList.remove('loading');
+  }
+
+  if(document.readyState==='complete'){
+    setTimeout(hidePreloader,900);
+  } else {
+    window.addEventListener('load',()=>setTimeout(hidePreloader,400));
+    setTimeout(hidePreloader,1800); // максимум 1.8s
+  }
+})();
+
 document.addEventListener('DOMContentLoaded',()=>{
   renderCases('all');
   updateExp();
   initLogo();
   initReveal();
   initTilt();
-  initMagnetic();
-  initNavObserver();
   preventWidows();
+  updateActiveOnScroll();
 });
 </script>
 </body>
