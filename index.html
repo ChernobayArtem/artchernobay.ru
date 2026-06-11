@@ -129,7 +129,7 @@
     .bcard-contacts{grid-column:span 2;display:flex;flex-direction:column}
     .bcard-label{display:block;font-size:10px;font-weight:500;color:var(--muted);letter-spacing:.07em;margin-bottom:14px}
 
-    .author-photo{width:100%;height:170px;border-radius:12px;object-fit:cover;object-position:center 15%;display:block}
+    .author-photo{width:100%;height:170px;border-radius:12px;object-fit:cover;object-position:center 30%;display:block}
     .author-placeholder{width:100%;height:170px;border-radius:12px;background:var(--surface);display:none;align-items:center;justify-content:center;font-size:40px;font-weight:700;color:var(--muted)}
 
     .bio-name{font-weight:600;font-size:17px;letter-spacing:-.02em;margin-bottom:8px}
@@ -838,7 +838,7 @@ function initLogo(){
 
 /* Прелоадер */
 (function(){
-  const name='Артём Чернобай';
+  const name='Сайт-портфолио UX/UI-дизайнера';
   const el=document.getElementById('preloaderName');
   const fill=document.getElementById('preloaderFill');
 
@@ -856,16 +856,14 @@ function initLogo(){
     setTimeout(()=>{
       s.style.opacity='1';
       s.style.transform='translateY(0)';
-    },150+i*75);
+    },150+i*45);
   });
 
   // линия прогресса
   setTimeout(()=>{ fill.style.width='100%'; },200);
 
-  // последняя буква появится на 150 + 13*75 + 550 = ~1675ms
-  // удерживаем имя ещё ~900ms после полного появления
-  const MIN_TIME=2500;
-  const MAX_TIME=3500;
+  const MIN_TIME=2700;
+  const MAX_TIME=3800;
 
   function hideSkeleton(){
     const sk=document.getElementById('skeleton');
