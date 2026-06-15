@@ -246,15 +246,9 @@
     .work-name{font-weight:600;font-size:16px;letter-spacing:-.02em;margin-bottom:12px}
     .work-role{font-size:12px;color:var(--text2)}
     .work-date{font-size:11px;color:var(--muted);margin-top:3px}
-    /* стрелка ↗ в правом верхнем углу */
-    .work-arrow{
-      position:absolute;top:16px;right:16px;
-      font-size:13px;color:var(--muted);opacity:.45;
-      transition:opacity .2s,color .2s;
-    }
-    .bcard-work:hover .work-arrow{opacity:1;color:var(--text)}
     .bcard-deco-icon{position:absolute;bottom:14px;right:16px;width:48px;height:48px;color:var(--muted);opacity:0.09;pointer-events:none;display:block}
-    .bcard:hover .bcard-deco-icon{opacity:0;transition:opacity .2s}
+    /* у опыта иконка прячется на ховере (под таймлайн); у работы — остаётся */
+    .bcard-exp:hover .bcard-deco-icon{opacity:0;transition:opacity .2s}
     .work-tooltip{
       position:absolute;top:-1px;left:calc(100% + 12px);width:230px;
       background:var(--bg);border:0.5px solid var(--border);border-radius:14px;padding:16px;
@@ -620,7 +614,6 @@
     </div>
 
     <div class="bcard bcard-work reveal" style="transition-delay:.14s">
-      <i class="ti ti-arrow-up-right work-arrow"></i>
       <div class="work-tabs">
         <button class="work-tab active" onclick="switchWork('now',this)">Сейчас</button>
         <button class="work-tab" onclick="switchWork('before',this)">Ранее</button>
