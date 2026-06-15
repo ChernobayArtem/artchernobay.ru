@@ -705,7 +705,7 @@ let loadedCount=0;     // сколько уже показано
 function makeCard(c,tab,delay){
   return `<div class="case-card reveal" style="transition-delay:${delay}s">
     <div class="case-preview" style="background:${theme==='dark'?c.dbg:c.lbg}">
-      ${c.vid?`<video src="${c.vid}" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;"></video>`:c.img?`<img src="${c.img}" alt="${c.title}" style="width:100%;height:100%;object-fit:cover;display:block;">`:`<span class="case-preview-lbl" style="color:${theme==='dark'?'rgba(255,255,255,0.18)':'rgba(0,0,0,0.13)'}">${c.title.toUpperCase()}</span>`}
+      ${c.vid?`<video src="${c.vid}" autoplay loop muted playsinline preload="auto" style="width:100%;height:100%;object-fit:cover;display:block;"></video>`:c.img?`<img src="${c.img}" alt="${c.title}" style="width:100%;height:100%;object-fit:cover;display:block;">`:`<span class="case-preview-lbl" style="color:${theme==='dark'?'rgba(255,255,255,0.18)':'rgba(0,0,0,0.13)'}">${c.title.toUpperCase()}</span>`}
     </div>
     <div class="case-info">
       <div class="case-info-left">
@@ -726,6 +726,23 @@ function revealNewCards(grid){
   });
 }
 
+// Принудительный запуск видео в карточках.
+// insertAdjacentHTML не всегда проставляет свойство muted из атрибута,
+// из-за чего браузеры (особенно Safari) блокируют автоплей. Ставим muted
+// в JS и играем по видимости через IntersectionObserver.
+function activateVideos(grid){
+  grid.querySelectorAll('video:not([data-activated])').forEach(v=>{
+    v.setAttribute('data-activated','1');
+    v.muted=true;v.playsInline=true;
+    const tryPlay=()=>{const p=v.play();if(p&&p.catch)p.catch(()=>{});};
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(es=>{
+        es.forEach(e=>{e.isIntersecting?tryPlay():v.pause();});
+      },{threshold:0.1}).observe(v);
+    }else{tryPlay();}
+  });
+}
+
 function loadMore(){
   const grid=document.getElementById('casesGrid');
   const sentinel=document.getElementById('casesSentinel');
@@ -743,6 +760,7 @@ function loadMore(){
   loadedCount+=batch.length;
 
   revealNewCards(grid);
+  activateVideos(grid);
 
   // если ещё есть карточки — вешаем sentinel обратно
   if(loadedCount<currentList.length){
@@ -775,6 +793,7 @@ function renderCases(tab){
   });
   loadedCount=first.length;
   revealNewCards(grid);
+  activateVideos(grid);
 
   // если карточек больше — добавляем sentinel
   if(loadedCount<currentList.length){
