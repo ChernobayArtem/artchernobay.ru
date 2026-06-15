@@ -273,6 +273,11 @@
       .work-tooltip{top:calc(100% + 10px);left:0;width:100%;transform:translateY(-6px)}
       .bcard-work:hover .work-pane.active .work-tooltip{transform:translateY(0)}
     }
+    /* на тач-устройствах ховер «залипает» при тапе по табам — тултип не нужен */
+    @media(hover:none){
+      .bcard-work::after{display:none}
+      .work-tooltip{display:none}
+    }
     .wt-logo{width:28px;height:28px;border-radius:7px;background:var(--inv);color:var(--invt);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-bottom:10px}
     .wt-logo-img{width:28px;height:28px;border-radius:7px;object-fit:cover;display:block;margin-bottom:10px}
     .wt-name{font-size:13px;font-weight:600;margin-bottom:5px}
