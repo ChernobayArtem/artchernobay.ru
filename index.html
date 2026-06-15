@@ -119,7 +119,7 @@
     .btn span,.btn i{position:relative;z-index:1}
 
     /* BENTO */
-    .bento{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:10px;margin-bottom:56px}
+    .bento{display:grid;grid-template-columns:1.25fr 1fr 1fr;grid-template-rows:auto 1fr;gap:10px;margin-bottom:56px}
     .bcard{
       background:var(--card);border:0.5px solid var(--border);border-radius:18px;padding:20px;
       transition:border-color .2s,transform .15s,box-shadow .2s;
@@ -148,7 +148,7 @@
 
     /* Карточка опыта — crossfade внутри карточки */
     .bcard-exp{position:relative;cursor:default;overflow:hidden}
-    .exp-content{position:relative;min-height:90px}
+    .exp-content{position:relative;min-height:80px}
     .exp-default{
       transition:opacity .3s ease,transform .3s ease;
     }
@@ -448,7 +448,7 @@
       .nav{padding:12px 18px}
       .wrap{padding:0 18px 60px}
       .hero-title{font-size:34px}
-      .bento{grid-template-columns:1fr 1fr}
+      .bento{grid-template-columns:1fr 1fr;grid-template-rows:none}
       .bcard-bio{grid-row:span 1;grid-column:span 2}
       .bcard-contacts{grid-column:span 2}
       .cases-grid{grid-template-columns:repeat(2,1fr)}
