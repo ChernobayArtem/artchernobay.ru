@@ -684,7 +684,7 @@ const CASES=[
   {cat:'mobile',title:"Onboarding & What's new",sub:'UX/UI-дизайн',lbg:'#fce7f3',dbg:'#500724'},
   {cat:'3d',title:'NOT A ROBOT',sub:'Blender · Лоу-поли',lbg:'#f1f5f9',dbg:'#0f172a',img:'preview/robot.jpeg'},
   {cat:'3d',title:'NOT A PLANE',sub:'Blender · Лоу-поли',lbg:'#e0f2fe',dbg:'#082f49',img:'preview/plane.jpeg'},
-  {cat:'3d',title:'NOT A FLAG',sub:'Blender · Лоу-поли',lbg:'#fff7ed',dbg:'#431407',vid:'preview/flag.mp4'},
+  {cat:'3d',title:'NOT A FLAG',sub:'Blender · Лоу-поли',lbg:'#fff7ed',dbg:'#431407',vid:'preview/flag.mp4',rate:0.7},
   {cat:'3d',title:'NOT A HOUSE',sub:'Blender · Диорама',lbg:'#f0fdf4',dbg:'#052e16'},
   {cat:'3d',title:'Ruins',sub:'Blender · Диорама',lbg:'#fdf4ff',dbg:'#3b0764'},
   {cat:'3d',title:'Coffee Shop',sub:'Blender · Диорама',lbg:'#fff8f0',dbg:'#3b1500'},
@@ -705,7 +705,7 @@ let loadedCount=0;     // сколько уже показано
 function makeCard(c,tab,delay){
   return `<div class="case-card reveal" style="transition-delay:${delay}s">
     <div class="case-preview" style="background:${theme==='dark'?c.dbg:c.lbg}">
-      ${c.vid?`<video src="${c.vid}" autoplay loop muted playsinline preload="auto" style="width:100%;height:100%;object-fit:cover;display:block;"></video>`:c.img?`<img src="${c.img}" alt="${c.title}" style="width:100%;height:100%;object-fit:cover;display:block;">`:`<span class="case-preview-lbl" style="color:${theme==='dark'?'rgba(255,255,255,0.18)':'rgba(0,0,0,0.13)'}">${c.title.toUpperCase()}</span>`}
+      ${c.vid?`<video src="${c.vid}" autoplay loop muted playsinline preload="auto"${c.rate?` data-rate="${c.rate}"`:''} style="width:100%;height:100%;object-fit:cover;display:block;"></video>`:c.img?`<img src="${c.img}" alt="${c.title}" style="width:100%;height:100%;object-fit:cover;display:block;">`:`<span class="case-preview-lbl" style="color:${theme==='dark'?'rgba(255,255,255,0.18)':'rgba(0,0,0,0.13)'}">${c.title.toUpperCase()}</span>`}
     </div>
     <div class="case-info">
       <div class="case-info-left">
@@ -734,6 +734,12 @@ function activateVideos(grid){
   grid.querySelectorAll('video:not([data-activated])').forEach(v=>{
     v.setAttribute('data-activated','1');
     v.muted=true;v.playsInline=true;
+    const rate=parseFloat(v.dataset.rate);
+    if(rate>0){
+      const setRate=()=>{v.defaultPlaybackRate=rate;v.playbackRate=rate;};
+      setRate();
+      v.addEventListener('loadedmetadata',setRate);
+    }
     const tryPlay=()=>{const p=v.play();if(p&&p.catch)p.catch(()=>{});};
     if('IntersectionObserver' in window){
       new IntersectionObserver(es=>{
