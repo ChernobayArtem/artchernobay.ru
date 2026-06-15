@@ -96,6 +96,7 @@
     .hero-title{font-size:50px;font-weight:700;line-height:1.1;letter-spacing:-.035em;margin-bottom:20px;color:var(--text)}
     .title-inv{background:var(--inv);color:var(--invt);padding:2px 10px;border-radius:9px;display:inline-block}
     .hero-sub{font-size:15px;color:var(--muted);max-width:560px;line-height:1.8;margin-bottom:28px}
+    .hero-sub-line{display:block}
     .hero-btns{display:flex;gap:10px;flex-wrap:wrap}
     .btn{
       padding:10px 22px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;
@@ -461,6 +462,8 @@
     }
     @media(max-width:480px){
       .hero-title{font-size:28px}
+      .hero-sub{line-height:1.6}
+      .hero-sub-line{display:inline}
       .bento{grid-template-columns:1fr}
       .bcard-bio,.bcard-contacts{grid-column:span 1}
       .cases-grid{grid-template-columns:1fr}
@@ -556,7 +559,8 @@
       для сложных систем
     </h1>
     <p class="hero-sub fu fu2">
-      Превращаю сложные процессы в&nbsp;понятные интерфейсы.<br>Работаю с&nbsp;B2B/B2G-продуктами, где каждое решение нужно обосновать
+      <span class="hero-sub-line">Превращаю сложные процессы в&nbsp;понятные интерфейсы.</span>
+      <span class="hero-sub-line">Работаю с&nbsp;B2B/B2G-продуктами, где каждое решение нужно обосновать</span>
     </p>
     <div class="hero-btns fu fu3">
       <a href="#cases" class="btn btn-inv sg"><span>Смотреть работы</span></a>
