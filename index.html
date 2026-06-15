@@ -228,13 +228,16 @@
 
     /* Панели */
     .work-pane{display:none}
-    .work-pane.active{display:block;animation:paneIn 1s cubic-bezier(0.16,1,0.3,1) backwards}
+    .work-pane.active{display:block}
+    /* анимация живёт на внутренней обёртке: transform на .work-pane делал бы её
+       containing-block'ом для absolute-тултипа и сбивал его позицию */
+    .work-pane.active .work-pane-inner{animation:paneIn 1s cubic-bezier(0.16,1,0.3,1) backwards}
     @keyframes paneIn{
       from{opacity:0;transform:translateX(16px)}
       to{opacity:1;transform:none}
     }
     /* при переходе на "Сейчас" — въезжает слева */
-    .work-pane.active.from-left{animation-name:paneInLeft}
+    .work-pane.active.from-left .work-pane-inner{animation-name:paneInLeft}
     @keyframes paneInLeft{
       from{opacity:0;transform:translateX(-16px)}
       to{opacity:1;transform:none}
@@ -585,9 +588,11 @@
 
       <!-- Сейчас -->
       <div class="work-pane active" id="workNow">
-        <div class="sg work-name">Notamedia</div>
-        <div class="work-role">Ведущий дизайнер</div>
-        <div class="work-date">с янв. 2024</div>
+        <div class="work-pane-inner">
+          <div class="sg work-name">Notamedia</div>
+          <div class="work-role">Ведущий дизайнер</div>
+          <div class="work-date">с янв. 2024</div>
+        </div>
         <div class="work-tooltip">
           <img src="https://www.google.com/s2/favicons?domain=integrator.nota.media&sz=64" alt="Notamedia" class="wt-logo-img">
           <div class="wt-name">Notamedia</div>
@@ -600,9 +605,11 @@
 
       <!-- Ранее -->
       <div class="work-pane" id="workBefore">
-        <div class="sg work-name">Дюшес</div>
-        <div class="work-role">UX/UI-дизайнер</div>
-        <div class="work-date">нояб. 2022 — 2023</div>
+        <div class="work-pane-inner">
+          <div class="sg work-name">Дюшес</div>
+          <div class="work-role">UX/UI-дизайнер</div>
+          <div class="work-date">нояб. 2022 — 2023</div>
+        </div>
         <div class="work-tooltip">
           <img src="https://www.google.com/s2/favicons?domain=dbranding.ru&sz=64" alt="Дюшес" class="wt-logo-img">
           <div class="wt-name">Дюшес</div>
