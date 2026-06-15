@@ -124,7 +124,7 @@
       transition:border-color .2s,transform .15s,box-shadow .2s;
       transform-style:preserve-3d;will-change:transform;
     }
-    .bcard:hover{border-color:var(--border-hover);box-shadow:var(--shadow)}
+    .bcard:hover{border-color:var(--border-hover)}
     .bcard-bio{grid-row:span 2;display:flex;flex-direction:column;gap:16px;overflow:hidden}
     .bcard-contacts{grid-column:span 2;display:flex;flex-direction:column}
     .bcard-label{display:block;font-size:10px;font-weight:500;color:var(--muted);letter-spacing:.07em;margin-bottom:14px;line-height:1.2}
@@ -288,7 +288,7 @@
       cursor:pointer;font-family:inherit;text-align:left;
       transition:border-color .15s,transform .15s,box-shadow .15s;
     }
-    .ccard:hover{border-color:var(--border-hover);box-shadow:var(--shadow)}
+    .ccard:hover{border-color:var(--border-hover)}
     .ccard-telegram{background:rgba(0,136,204,0.07);border-color:rgba(0,136,204,0.25)}
     .ccard-telegram:hover{border-color:rgba(0,136,204,0.55);background:rgba(0,136,204,0.12)}
     .ccard-telegram .ccard-icon{color:var(--tg)}
@@ -317,7 +317,7 @@
     .tab-btn.active{background:var(--bg);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.1)}
     .cases-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
     .case-card{background:var(--card);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .2s ease,border-color .15s,box-shadow .2s}
-    .case-card:hover{transform:translateY(-5px);border-color:var(--border-hover);box-shadow:var(--shadow)}
+    .case-card:hover{transform:translateY(-5px);border-color:var(--border-hover)}
     .case-preview{height:300px;display:flex;align-items:center;justify-content:center;overflow:hidden}
     .case-preview img,.case-preview video{transition:transform .4s ease;width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.12)}
     .case-card:hover .case-preview img,.case-card:hover .case-preview video{transform:scale(1)}
@@ -684,7 +684,7 @@ const CASES=[
   {cat:'mobile',title:"Onboarding & What's new",sub:'UX/UI-дизайн',lbg:'#fce7f3',dbg:'#500724'},
   {cat:'3d',title:'NOT A ROBOT',sub:'Blender · Лоу-поли',lbg:'#f1f5f9',dbg:'#0f172a',img:'robot.jpeg'},
   {cat:'3d',title:'NOT A PLANE',sub:'Blender · Лоу-поли',lbg:'#e0f2fe',dbg:'#082f49',img:'plane.jpeg'},
-  {cat:'3d',title:'Pixel Flag',sub:'Blender · Лоу-поли',lbg:'#fff7ed',dbg:'#431407',vid:'flag.mov'},
+  {cat:'3d',title:'NOT A FLAG',sub:'Blender · Лоу-поли',lbg:'#fff7ed',dbg:'#431407',vid:'flag.mov'},
   {cat:'3d',title:'NOT A HOUSE',sub:'Blender · Диорама',lbg:'#f0fdf4',dbg:'#052e16'},
   {cat:'3d',title:'Ruins',sub:'Blender · Диорама',lbg:'#fdf4ff',dbg:'#3b0764'},
   {cat:'3d',title:'Coffee Shop',sub:'Blender · Диорама',lbg:'#fff8f0',dbg:'#3b1500'},
