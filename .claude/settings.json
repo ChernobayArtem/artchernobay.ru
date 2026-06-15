@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/check-commit-size.sh\"",
+            "timeout": 15,
+            "statusMessage": "Checking commit for large files"
+          }
+        ]
+      }
+    ]
+  }
+}
