@@ -12,15 +12,15 @@
     :root{
       --bg:#ffffff;--surface:#f8f7f4;--border:rgba(0,0,0,0.08);--border-hover:rgba(0,0,0,0.22);
       --text:#0c0c0c;--text2:#444444;--muted:#888888;--muted2:#555555;
-      --card:#fafaf7;--tag:#f0eeea;--inv:#0c0c0c;--invt:#ffffff;
+      --card:#fafaf7;--tag:#f0eeea;--inv:#0c0c0c;--invt:#ffffff;--accent:#2563eb;
       --nav-bg:rgba(255,255,255,0.92);
-      --shadow:0 8px 28px rgba(0,0,0,0.07);
+      --shadow:0 8px 28px rgba(0,0,0,0.07);--shadow-lg:0 20px 60px rgba(0,0,0,0.18);
     }
     [data-theme="dark"]{
       --bg:#0c0c0c;--surface:#161616;--border:rgba(255,255,255,0.07);--border-hover:rgba(255,255,255,0.22);
       --text:#efefef;--text2:#cccccc;--muted:#666666;--muted2:#aaaaaa;
-      --card:#131313;--tag:#1e1e1e;--inv:#efefef;--invt:#0c0c0c;
-      --nav-bg:rgba(12,12,12,0.92);--shadow:0 8px 28px rgba(0,0,0,0.35);
+      --card:#131313;--tag:#1e1e1e;--inv:#efefef;--invt:#0c0c0c;--accent:#3b82f6;
+      --nav-bg:rgba(12,12,12,0.92);--shadow:0 8px 28px rgba(0,0,0,0.35);--shadow-lg:0 20px 60px rgba(0,0,0,0.6);
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth}
@@ -32,8 +32,9 @@
     }
     .sg{font-family:'Space Grotesk',system-ui,sans-serif}
 
+    /* NAV */
     .nav{
-      position:sticky;top:0;z-index:100;
+      position:sticky;top:0;z-index:200;
       background:var(--nav-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
       border-bottom:0.5px solid var(--border);
       padding:13px 32px;
@@ -41,8 +42,7 @@
     }
     .back-btn{
       font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;
-      display:inline-flex;align-items:center;gap:6px;
-      transition:color .15s;
+      display:inline-flex;align-items:center;gap:6px;transition:color .15s;
     }
     .back-btn:hover{color:var(--text)}
     .theme-btn{
@@ -53,115 +53,508 @@
     }
     .theme-btn:hover{opacity:.8;transform:translateY(-2px)}
 
-    .case-hero{
-      width:100%;height:480px;overflow:hidden;
-      display:flex;align-items:center;justify-content:center;
-      transition:background .25s;
-    }
-    .case-hero img,.case-hero video{width:100%;height:100%;object-fit:cover;display:block;}
-    .case-hero-lbl{
-      font-family:'Space Grotesk',system-ui,sans-serif;
-      font-size:clamp(24px,6vw,72px);font-weight:700;letter-spacing:-.03em;
-      opacity:0.12;user-select:none;
-    }
-
-    .case-body{max-width:800px;margin:0 auto;padding:48px 32px 80px}
     .case-cat{
       display:inline-block;
       font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;
       color:var(--muted2);background:var(--tag);border:0.5px solid var(--border);
-      border-radius:20px;padding:3px 10px;margin-bottom:20px;
-    }
-    .case-title-lg{
-      font-family:'Space Grotesk',system-ui,sans-serif;
-      font-size:clamp(32px,5vw,56px);font-weight:700;letter-spacing:-.03em;
-      line-height:1.1;margin-bottom:12px;
-    }
-    .case-sub-lg{font-size:16px;color:var(--muted);line-height:1.7;margin-bottom:40px}
-    .case-divider{height:0.5px;background:var(--border);margin-bottom:40px}
-    .case-placeholder{
-      font-size:14px;color:var(--muted);text-align:center;padding:56px 24px;
-      border:0.5px dashed var(--border);border-radius:12px;line-height:1.6;
+      border-radius:20px;padding:3px 10px;
     }
 
-    @media(max-width:480px){
+    /* ============ STACK (3D) ============ */
+    .stack{
+      height:calc(100vh - 58px);
+      position:relative;display:flex;flex-direction:column;overflow:hidden;
+      touch-action:none;
+    }
+    .stack-head{position:absolute;top:22px;left:32px;z-index:40;pointer-events:none}
+    .stack-head .case-cat{pointer-events:auto;margin-bottom:10px}
+    .stack-title{
+      font-family:'Space Grotesk',system-ui,sans-serif;
+      font-size:clamp(26px,3.4vw,42px);font-weight:700;letter-spacing:-.03em;line-height:1;
+      margin-top:10px;
+    }
+    .stack-hint{
+      margin-top:14px;font-size:11px;color:var(--muted);opacity:.75;
+      display:inline-flex;align-items:center;gap:6px;
+    }
+    .stack-hint i{font-size:14px}
+    .stack-stage{
+      position:relative;flex:1;display:flex;align-items:center;justify-content:center;
+      perspective:1400px;
+    }
+    .sframe{
+      position:absolute;width:min(52vh,78vw);aspect-ratio:1/1;
+      border-radius:18px;overflow:hidden;
+      box-shadow:var(--shadow-lg);
+      transition:transform .55s cubic-bezier(.22,.61,.36,1),opacity .55s ease;
+      will-change:transform,opacity;backface-visibility:hidden;
+      transform-origin:center center;
+    }
+    .sframe img,.sframe video{width:100%;height:100%;object-fit:cover;display:block}
+
+    /* правый столбец точек-индикаторов кадров */
+    .stack-dots{
+      position:absolute;right:26px;top:50%;transform:translateY(-50%);
+      z-index:40;display:flex;flex-direction:column;gap:9px;
+    }
+    .sdot{
+      width:8px;height:8px;border-radius:50%;border:none;padding:0;cursor:pointer;
+      background:var(--border-hover);opacity:.5;transition:opacity .2s,transform .2s,background .2s;
+    }
+    .sdot:hover{opacity:.8}
+    .sdot.active{opacity:1;background:var(--text);transform:scale(1.35)}
+
+    /* нижняя панель — переход между 3D-кейсами + счётчик */
+    .stack-foot{
+      position:absolute;left:0;right:0;bottom:18px;z-index:40;
+      display:flex;align-items:center;justify-content:center;gap:14px;
+      pointer-events:none;
+    }
+    .scase{
+      pointer-events:auto;
+      display:inline-flex;align-items:center;gap:7px;max-width:42vw;
+      padding:9px 16px;border-radius:11px;border:0.5px solid var(--border);
+      background:var(--card);color:var(--text);cursor:pointer;
+      font-size:12.5px;font-weight:500;
+      transition:border-color .2s,transform .2s,box-shadow .2s;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .scase:hover{border-color:var(--border-hover);transform:translateY(-2px);box-shadow:var(--shadow)}
+    .scase i{font-size:15px;color:var(--muted);flex-shrink:0}
+    .scase-label{overflow:hidden;text-overflow:ellipsis}
+    .stack-count{
+      pointer-events:auto;
+      font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;
+      min-width:54px;text-align:center;
+    }
+    /* ============ SCRUBBER (UX) ============ */
+    .scrub{max-width:1160px;margin:0 auto;padding:34px 32px 40px}
+    .scrub-head{margin-bottom:22px}
+    .scrub-head .case-cat{margin-bottom:14px}
+    .scrub-title{
+      font-family:'Space Grotesk',system-ui,sans-serif;
+      font-size:clamp(30px,4vw,48px);font-weight:700;letter-spacing:-.03em;
+      line-height:1.05;margin-bottom:8px;
+    }
+    .scrub-sub{font-size:15px;color:var(--muted);line-height:1.6;max-width:560px}
+
+    .scrub-window{
+      width:100%;height:60vh;min-height:340px;
+      border-radius:16px;border:0.5px solid var(--border);
+      background:var(--surface);overflow:auto;display:grid;
+      scrollbar-width:thin;scrollbar-color:var(--border-hover) transparent;
+    }
+    .scrub-window::-webkit-scrollbar{width:8px}
+    .scrub-window::-webkit-scrollbar-thumb{background:var(--border-hover);border-radius:8px}
+    .scrub-img{
+      place-self:center;width:100%;height:auto;display:block;
+      transition:opacity .22s ease;
+    }
+    .scrub-img.fading{opacity:0}
+
+    /* таймлайн-скруббер */
+    .scrub-bar{margin-top:18px;user-select:none}
+    .segs{
+      position:relative;display:flex;gap:6px;
+      touch-action:none;cursor:grab;
+    }
+    .segs.dragging{cursor:grabbing}
+    .seg{
+      flex:1 1 0;min-width:0;
+      padding:13px 10px;border-radius:10px;border:none;
+      background:var(--tag);color:var(--muted2);
+      font-size:12.5px;font-weight:500;font-family:inherit;
+      cursor:pointer;transition:background .2s,color .2s;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;
+      pointer-events:auto;
+    }
+    .seg:hover{background:var(--border)}
+    .seg.active{background:var(--accent);color:#fff}
+    .seg-num{display:none}
+
+    /* плейхед */
+    .playhead{
+      position:absolute;top:-7px;bottom:-7px;left:0;width:0;
+      pointer-events:none;z-index:5;
+      transition:transform .25s cubic-bezier(.22,.61,.36,1);
+    }
+    .segs.dragging .playhead{transition:none}
+    .playhead::before{ /* вертикальная линия */
+      content:'';position:absolute;left:-1px;top:0;bottom:0;width:2px;
+      background:var(--text);border-radius:2px;
+    }
+    .playhead::after{ /* треугольник сверху */
+      content:'';position:absolute;left:-6px;top:-1px;
+      border-left:6px solid transparent;border-right:6px solid transparent;
+      border-top:8px solid var(--text);
+    }
+
+    /* линейка делений */
+    .ticks{display:flex;justify-content:space-between;margin-top:12px;padding:0 2px}
+    .tick{width:1px;height:7px;background:var(--border-hover);opacity:.55}
+    .tick.major{height:11px;opacity:.9}
+
+    .scrub-counter{
+      margin-top:14px;font-size:12px;color:var(--muted);
+      font-variant-numeric:tabular-nums;text-align:center;
+    }
+
+    /* ============ FALLBACK ============ */
+    .fb-hero{
+      width:100%;height:440px;overflow:hidden;
+      display:flex;align-items:center;justify-content:center;transition:background .25s;
+    }
+    .fb-hero img,.fb-hero video{width:100%;height:100%;object-fit:cover;display:block}
+    .fb-hero-lbl{
+      font-family:'Space Grotesk',system-ui,sans-serif;
+      font-size:clamp(24px,6vw,72px);font-weight:700;letter-spacing:-.03em;opacity:.12;
+    }
+    .fb-body{max-width:800px;margin:0 auto;padding:44px 32px 80px}
+    .fb-title{
+      font-family:'Space Grotesk',system-ui,sans-serif;
+      font-size:clamp(30px,5vw,52px);font-weight:700;letter-spacing:-.03em;line-height:1.1;margin-bottom:10px;
+    }
+    .fb-sub{font-size:16px;color:var(--muted);line-height:1.7;margin-bottom:36px}
+    .fb-placeholder{
+      font-size:14px;color:var(--muted);text-align:center;padding:52px 24px;
+      border:0.5px dashed var(--border);border-radius:12px;
+    }
+
+    @media(max-width:680px){
       .nav{padding:13px 16px}
-      .case-hero{height:260px}
-      .case-body{padding:32px 16px 64px}
+      .stack-head{left:16px;top:16px}
+      .stack-foot{flex-wrap:nowrap;gap:8px;padding:0 12px}
+      .scase{font-size:11.5px;padding:8px 12px;max-width:38vw}
+      .scrub{padding:24px 16px 32px}
+      .scrub-window{height:50vh}
+      .seg{font-size:0;padding:11px 4px}
+      .seg-num{display:inline;font-size:12px}
+      .fb-hero{height:240px}
+      .fb-body{padding:32px 16px 64px}
     }
   </style>
 </head>
 <body>
   <nav class="nav">
-    <a href="index.html" class="back-btn">
-      <i class="ti ti-arrow-left"></i> Назад
-    </a>
+    <a href="index.html" class="back-btn"><i class="ti ti-arrow-left"></i> Назад</a>
     <button class="theme-btn" onclick="toggleTheme()" aria-label="Переключить тему">
       <i class="ti ti-moon" id="themeIcon"></i>
     </button>
   </nav>
 
-  <div id="caseHero" class="case-hero"></div>
-
-  <div class="case-body">
-    <span class="case-cat" id="caseCat"></span>
-    <h1 class="case-title-lg" id="caseTitle"></h1>
-    <p class="case-sub-lg" id="caseSub"></p>
-    <div class="case-divider"></div>
-    <div class="case-placeholder">Кейс-стади в разработке</div>
-  </div>
+  <main id="stage"></main>
 
   <script src="cases-data.js"></script>
   <script>
-    let theme = localStorage.getItem('theme') || 'light';
+  /* ===== медиа по кейсам (наполняется по мере готовности) ===== */
+  const CASE_MEDIA={
+    'not-a-robot':{type:'stack',frames:[
+      {img:'cases/robot/1.jpg'},
+      {img:'cases/robot/2.jpg'},
+      {img:'cases/robot/3.jpg'},
+      {img:'cases/robot/4.jpg'},
+      {img:'cases/robot/5.jpg'},
+      {img:'cases/robot/6.jpg'},
+      {vid:'cases/robot/video.mp4'},
+    ]},
+    'listy':{type:'scrubber',frames:[
+      {img:'cases/listy/0.jpg',label:'Обложка'},
+      {img:'cases/listy/1.jpg',label:'Возможности'},
+      {img:'cases/listy/2.jpg',label:'С чего началось'},
+      {img:'cases/listy/3.jpg',label:'Визуал'},
+      {img:'cases/listy/4.jpg',label:'Функциональность'},
+      {img:'cases/listy/5.jpg',label:'Промолендинг'},
+      {img:'cases/listy/6.jpg',label:'Сторы'},
+      {img:'cases/listy/7.jpg',label:'Что дальше'},
+      {img:'cases/listy/8.jpg',label:'Итоги'},
+    ]},
+  };
 
-    function applyTheme(){
-      document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
-      document.getElementById('themeIcon').className = theme === 'dark' ? 'ti ti-sun' : 'ti ti-moon';
+  /* ===== тема ===== */
+  let theme=localStorage.getItem('theme')||'light';
+  function applyTheme(){
+    document.documentElement.setAttribute('data-theme',theme==='dark'?'dark':'');
+    document.getElementById('themeIcon').className=theme==='dark'?'ti ti-sun':'ti ti-moon';
+  }
+  function toggleTheme(){
+    theme=theme==='light'?'dark':'light';
+    localStorage.setItem('theme',theme);
+    applyTheme();
+    if(window._onTheme)window._onTheme();
+  }
+
+  /* ===== роутинг ===== */
+  const slug=location.hash.slice(1);
+  const c=slug?CASES.find(x=>x.slug===slug):null;
+  function gotoCase(s){location.hash=s;location.reload();}
+
+  if(!c){
+    location.href='index.html';
+  }else{
+    applyTheme();
+    document.title=c.title+' — Артём Чернобай';
+    const media=CASE_MEDIA[slug];
+    const stage=document.getElementById('stage');
+    if(media&&media.type==='stack')      buildStack(c,media.frames,stage);
+    else if(media&&media.type==='scrubber') buildScrubber(c,media.frames,stage);
+    else                                  buildFallback(c,stage);
+  }
+
+  /* ============================================================
+     ВЕРТИКАЛЬНЫЙ СТЕК (3D)
+     ============================================================ */
+  function buildStack(c,frames,stage){
+    const cat=c.cat==='mobile'?'Мобилка':'3D · Blender';
+    const sec=document.createElement('section');
+    sec.className='stack';
+
+    let framesHTML='';
+    frames.forEach((f,i)=>{
+      const media=f.vid
+        ? `<video src="${f.vid}" loop muted playsinline preload="metadata"></video>`
+        : `<img src="${f.img}" alt="${c.title} — кадр ${i+1}">`;
+      framesHTML+=`<div class="sframe" data-i="${i}">${media}</div>`;
+    });
+
+    // соседние 3D-кейсы для нижней навигации
+    const threeD=CASES.filter(x=>x.cat==='3d');
+    const ti=threeD.findIndex(x=>x.slug===c.slug);
+    const prev=threeD[(ti-1+threeD.length)%threeD.length];
+    const next=threeD[(ti+1)%threeD.length];
+
+    sec.innerHTML=`
+      <div class="stack-head">
+        <span class="case-cat">${cat}</span>
+        <div class="stack-title">${c.title}</div>
+        <div class="stack-hint"><i class="ti ti-mouse"></i> Колесо или ↑ ↓ — листать рендеры</div>
+      </div>
+      <div class="stack-stage" id="stackStage">${framesHTML}</div>
+      <div class="stack-dots" id="stackDots">
+        ${frames.map((f,i)=>`<button class="sdot" data-i="${i}" aria-label="Кадр ${i+1}"></button>`).join('')}
+      </div>
+      <div class="stack-foot">
+        <button class="scase scase-prev"><i class="ti ti-chevron-left"></i><span class="scase-label">${prev.title}</span></button>
+        <span class="stack-count" id="stackCount">01 / ${String(frames.length).padStart(2,'0')}</span>
+        <button class="scase scase-next"><span class="scase-label">${next.title}</span><i class="ti ti-chevron-right"></i></button>
+      </div>`;
+    stage.appendChild(sec);
+
+    const els=[...sec.querySelectorAll('.sframe')];
+    const dots=[...sec.querySelectorAll('.sdot')];
+    const stageEl=sec.querySelector('#stackStage');
+    const countEl=sec.querySelector('#stackCount');
+    let active=0,locked=false;
+
+    function update(){
+      const S=els[0].offsetHeight||Math.min(window.innerHeight*0.52,window.innerWidth*0.78);
+      const half=S/2, flat=0.11, band=S*flat, edge=10;
+      els.forEach((el,i)=>{
+        const off=i-active, a=Math.abs(off), dir=off<0?-1:1;
+        let ty,sx,sy,op,z;
+        if(off===0){ty=0;sx=1;sy=1;op=1;z=30;}
+        else{
+          ty=dir*(half+edge+band/2+(a-1)*(band+8));
+          sx=Math.max(0.7,1-a*0.06);
+          sy=flat;
+          op=a===1?0.5:(a===2?0.14:0);
+          z=30-a;
+        }
+        el.style.transform=`translateY(${ty}px) scale(${sx},${sy})`;
+        el.style.opacity=op;
+        el.style.zIndex=z;
+      });
+      dots.forEach((d,i)=>d.classList.toggle('active',i===active));
+      countEl.textContent=String(active+1).padStart(2,'0')+' / '+String(els.length).padStart(2,'0');
+      // видео: играем активное, остальные пауза
+      els.forEach((el,i)=>{
+        const v=el.querySelector('video');
+        if(!v)return;
+        if(i===active){
+          const tryPlay=()=>{const p=v.play();if(p&&p.catch)p.catch(()=>{});};
+          tryPlay();
+          if(v.readyState<3)v.addEventListener('canplay',()=>{if(active===i)tryPlay();},{once:true});
+        }else v.pause();
+      });
+    }
+    function go(d){
+      const n=Math.max(0,Math.min(els.length-1,active+d));
+      if(n===active)return;
+      active=n;update();
     }
 
-    function toggleTheme(){
-      theme = theme === 'light' ? 'dark' : 'light';
-      localStorage.setItem('theme', theme);
-      applyTheme();
-      const hero = document.getElementById('caseHero');
-      if(c) hero.style.background = theme === 'dark' ? c.dbg : c.lbg;
+    // колесо
+    stageEl.addEventListener('wheel',e=>{
+      e.preventDefault();
+      if(locked)return;
+      if(Math.abs(e.deltaY)<8)return;
+      locked=true;
+      go(e.deltaY>0?1:-1);
+      setTimeout(()=>locked=false,480);
+    },{passive:false});
+
+    // драг вертикальный
+    let dy0=null;
+    stageEl.addEventListener('pointerdown',e=>{dy0=e.clientY;stageEl.setPointerCapture(e.pointerId);});
+    stageEl.addEventListener('pointermove',e=>{
+      if(dy0===null)return;
+      const d=e.clientY-dy0;
+      if(Math.abs(d)>55){go(d<0?1:-1);dy0=e.clientY;}
+    });
+    stageEl.addEventListener('pointerup',()=>dy0=null);
+    stageEl.addEventListener('pointercancel',()=>dy0=null);
+
+    // точки
+    dots.forEach(d=>d.addEventListener('click',()=>{active=+d.dataset.i;update();}));
+
+    // клавиатура
+    window.addEventListener('keydown',e=>{
+      if(e.key==='ArrowDown'){e.preventDefault();go(1);}
+      else if(e.key==='ArrowUp'){e.preventDefault();go(-1);}
+    });
+
+    // навигация между кейсами
+    sec.querySelector('.scase-prev').addEventListener('click',()=>gotoCase(prev.slug));
+    sec.querySelector('.scase-next').addEventListener('click',()=>gotoCase(next.slug));
+
+    window.addEventListener('resize',update);
+    requestAnimationFrame(update);
+    // повторный апдейт после загрузки первого кадра (offsetHeight)
+    if(els[0].querySelector('img')){
+      const im=els[0].querySelector('img');
+      if(im.complete)requestAnimationFrame(update);
+      else im.addEventListener('load',update,{once:true});
     }
+  }
 
-    const slug = location.hash.slice(1);
-    const c = slug ? CASES.find(x => x.slug === slug) : null;
+  /* ============================================================
+     ГОРИЗОНТАЛЬНЫЙ СКРУББЕР (UX)
+     ============================================================ */
+  function buildScrubber(c,frames,stage){
+    const cat=c.cat==='mobile'?'Мобилка':'Веб';
+    const sec=document.createElement('section');
+    sec.className='scrub';
 
-    if(!c){
-      location.href = 'index.html';
-    } else {
-      document.title = c.title + ' — Артём Чернобай';
-      document.getElementById('caseCat').textContent = c.cat === 'mobile' ? 'Мобилка' : '3D · Blender';
-      document.getElementById('caseTitle').textContent = c.title;
-      document.getElementById('caseSub').textContent = c.sub;
+    const N=frames.length;
+    const tickCount=41;
+    let ticksHTML='';
+    for(let i=0;i<tickCount;i++)ticksHTML+=`<span class="tick${i%5===0?' major':''}"></span>`;
 
-      const hero = document.getElementById('caseHero');
-      hero.style.background = theme === 'dark' ? c.dbg : c.lbg;
+    sec.innerHTML=`
+      <div class="scrub-head">
+        <span class="case-cat">${cat}</span>
+        <h1 class="scrub-title">${c.title}</h1>
+        <p class="scrub-sub">${c.sub}</p>
+      </div>
+      <div class="scrub-window" id="scrubWindow">
+        <img class="scrub-img" id="scrubImg" src="${frames[0].img}" alt="${c.title} — ${frames[0].label}">
+      </div>
+      <div class="scrub-bar">
+        <div class="segs" id="segs">
+          ${frames.map((f,i)=>`<button class="seg${i===0?' active':''}" data-i="${i}"><span class="seg-text">${f.label}</span><span class="seg-num">${i+1}</span></button>`).join('')}
+          <div class="playhead" id="playhead"></div>
+        </div>
+        <div class="ticks">${ticksHTML}</div>
+        <div class="scrub-counter" id="scrubCounter">01 / ${String(N).padStart(2,'0')} · ${frames[0].label}</div>
+      </div>`;
+    stage.appendChild(sec);
 
-      if(c.vid){
-        const v = document.createElement('video');
-        v.src = c.vid; v.autoplay = true; v.loop = true; v.muted = true; v.playsInline = true;
-        if(c.rate){ v.defaultPlaybackRate = c.rate; v.playbackRate = c.rate; }
-        v.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-        hero.appendChild(v);
-      } else if(c.img){
-        const img = document.createElement('img');
-        img.src = c.img; img.alt = c.title;
-        img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-        hero.appendChild(img);
-      } else {
-        const lbl = document.createElement('div');
-        lbl.className = 'case-hero-lbl';
-        lbl.textContent = c.title;
-        hero.appendChild(lbl);
+    const segs=sec.querySelector('#segs');
+    const segEls=[...sec.querySelectorAll('.seg')];
+    const playhead=sec.querySelector('#playhead');
+    const img=sec.querySelector('#scrubImg');
+    const win=sec.querySelector('#scrubWindow');
+    const counter=sec.querySelector('#scrubCounter');
+    let active=0;
+
+    function placePlayhead(frac){ // frac 0..1 по ширине segs
+      playhead.style.transform=`translateX(${frac*segs.clientWidth}px)`;
+    }
+    function setFrame(i,fromDrag){
+      i=Math.max(0,Math.min(N-1,i));
+      if(i!==active){
+        active=i;
+        img.classList.add('fading');
+        setTimeout(()=>{
+          img.src=frames[i].img;
+          img.alt=c.title+' — '+frames[i].label;
+          win.scrollTop=0;
+          img.classList.remove('fading');
+        },140);
       }
-
-      applyTheme();
+      segEls.forEach((s,k)=>s.classList.toggle('active',k===i));
+      counter.textContent=String(i+1).padStart(2,'0')+' / '+String(N).padStart(2,'0')+' · '+frames[i].label;
+      if(!fromDrag)placePlayhead((i+0.5)/N);
     }
+
+    // клик по сегменту
+    segEls.forEach(s=>s.addEventListener('click',()=>setFrame(+s.dataset.i)));
+
+    // драг по таймлайну
+    let dragging=false;
+    function fracFromX(clientX){
+      const r=segs.getBoundingClientRect();
+      return Math.max(0,Math.min(1,(clientX-r.left)/r.width));
+    }
+    function onMove(clientX){
+      const frac=fracFromX(clientX);
+      placePlayhead(frac);
+      const i=Math.max(0,Math.min(N-1,Math.floor(frac*N)));
+      setFrame(i,true);
+    }
+    segs.addEventListener('pointerdown',e=>{
+      // клики по кнопке-сегменту обрабатываются отдельно; драг — по фону/линии
+      dragging=true;segs.classList.add('dragging');
+      segs.setPointerCapture(e.pointerId);
+      onMove(e.clientX);
+    });
+    segs.addEventListener('pointermove',e=>{if(dragging)onMove(e.clientX);});
+    function endDrag(){
+      if(!dragging)return;
+      dragging=false;segs.classList.remove('dragging');
+      placePlayhead((active+0.5)/N); // доводим к центру активного сегмента
+    }
+    segs.addEventListener('pointerup',endDrag);
+    segs.addEventListener('pointercancel',endDrag);
+
+    // клавиатура
+    window.addEventListener('keydown',e=>{
+      if(e.key==='ArrowRight'){e.preventDefault();setFrame(active+1);}
+      else if(e.key==='ArrowLeft'){e.preventDefault();setFrame(active-1);}
+    });
+
+    window.addEventListener('resize',()=>placePlayhead((active+0.5)/N));
+    requestAnimationFrame(()=>placePlayhead(0.5/N));
+  }
+
+  /* ============================================================
+     FALLBACK — кейсы без медиа
+     ============================================================ */
+  function buildFallback(c,stage){
+    const cat=c.cat==='mobile'?'Мобилка':'3D · Blender';
+    const hero=document.createElement('div');
+    hero.className='fb-hero';
+    hero.style.background=theme==='dark'?c.dbg:c.lbg;
+    if(c.vid){
+      const v=document.createElement('video');
+      v.src=c.vid;v.autoplay=true;v.loop=true;v.muted=true;v.playsInline=true;
+      if(c.rate){v.defaultPlaybackRate=c.rate;v.playbackRate=c.rate;}
+      hero.appendChild(v);
+    }else if(c.img){
+      const im=document.createElement('img');im.src=c.img;im.alt=c.title;hero.appendChild(im);
+    }else{
+      const l=document.createElement('div');l.className='fb-hero-lbl';l.textContent=c.title;hero.appendChild(l);
+    }
+    const body=document.createElement('div');
+    body.className='fb-body';
+    body.innerHTML=`
+      <span class="case-cat" style="margin-bottom:18px">${cat}</span>
+      <h1 class="fb-title" style="margin-top:16px">${c.title}</h1>
+      <p class="fb-sub">${c.sub}</p>
+      <div class="fb-placeholder">Кейс-стади в разработке</div>`;
+    stage.appendChild(hero);
+    stage.appendChild(body);
+    window._onTheme=()=>{hero.style.background=theme==='dark'?c.dbg:c.lbg;};
+  }
   </script>
 </body>
 </html>
