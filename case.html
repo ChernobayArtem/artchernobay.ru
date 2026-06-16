@@ -194,39 +194,44 @@
       position:relative;height:52px;cursor:grab;touch-action:none;
     }
     .timeline.dragging{cursor:grabbing}
-    /* слой 1 — фоны-чипы (разная ширина = разное кол-во экранов) */
+    /* слой 1 — фоны-чипы (разная ширина = разное кол-во экранов; без padding,
+       чтобы ширины совпадали со слоем подписей и текст был ровно по центру) */
     .tl-bgs{position:absolute;inset:0;display:flex;gap:7px;z-index:0}
     .tl-bg{
       min-width:0;border-radius:13px;background:var(--tag);
       transition:background .25s,flex-grow .35s cubic-bezier(.22,.61,.36,1);
     }
-    .tl-bg:hover{background:var(--border)}
     .tl-bg.active{background:color-mix(in srgb,var(--accent) 22%,var(--bg))}
-    /* слой 2 — линия-плейхед: над фонами, под текстом → прячется за буквами */
+    /* слой 2 — линия-плейхед: целиком ВНУТРИ чипа, над фоном, под подписью */
     .playhead{
-      position:absolute;top:-3px;bottom:-3px;left:0;width:0;z-index:1;pointer-events:none;
+      position:absolute;top:0;bottom:0;left:0;width:0;z-index:1;pointer-events:none;
       transition:transform .3s cubic-bezier(.22,.61,.36,1);
     }
     .timeline.dragging .playhead{transition:none}
-    .playhead::before{ /* вертикальная линия */
-      content:'';position:absolute;left:-1px;top:0;bottom:0;width:2px;
+    .playhead::before{ /* вертикальная линия (внутри чипа) */
+      content:'';position:absolute;left:-1px;top:4px;bottom:4px;width:2px;
       background:var(--text);border-radius:2px;
     }
-    .playhead::after{ /* треугольник-маркер сверху */
-      content:'';position:absolute;left:-6px;top:-7px;
-      border-left:6px solid transparent;border-right:6px solid transparent;
-      border-top:9px solid var(--text);
+    .playhead::after{ /* треугольник-маркер сверху, тоже внутри чипа */
+      content:'';position:absolute;left:-5px;top:3px;
+      border-left:5px solid transparent;border-right:5px solid transparent;
+      border-top:8px solid var(--text);
     }
-    /* слой 3 — подписи: прозрачный фон, поверх линии (буквы перекрывают линию) */
+    /* слой 3 — подписи поверх линии. Текст сидит в плашке цвета чипа, поэтому
+       линия закрыта на тексте (исчезает даже при драге), а видна сверху/снизу
+       и по бокам. Без padding на ячейке → ширины = слою фонов, текст по центру */
     .tl-labels{position:absolute;inset:0;display:flex;gap:7px;z-index:2;pointer-events:none}
-    .tl-label{
-      min-width:0;display:flex;align-items:center;justify-content:center;padding:0 12px;
-    }
+    .tl-label{min-width:0;display:flex;align-items:center;justify-content:center}
     .tl-text{
+      max-width:100%;padding:6px 12px;border-radius:9px;background:var(--tag);
       font-size:14px;font-weight:500;color:var(--muted2);
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .25s;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      transition:color .25s,background .25s;
     }
-    .tl-label.active .tl-text{color:var(--text);font-weight:600}
+    .tl-label.active .tl-text{
+      background:color-mix(in srgb,var(--accent) 22%,var(--bg));
+      color:var(--text);font-weight:600;
+    }
     .tl-num{display:none}
 
     /* линейка-рулетка под чипами */
@@ -274,10 +279,12 @@
       .sframe{width:min(88vw,52vh);aspect-ratio:1/1;border-radius:28px}
       .scrub{padding:24px 16px 32px}
       .scrub-window{height:50vh}
-      .tl-label{padding:0 4px}
       .tl-text{display:none}
-      .tl-num{display:inline;font-size:12px;font-weight:500;color:var(--muted2)}
-      .tl-label.active .tl-num{color:#fff}
+      .tl-num{
+        display:inline;padding:6px 0;min-width:30px;text-align:center;border-radius:9px;
+        background:var(--tag);font-size:12px;font-weight:500;color:var(--muted2);
+      }
+      .tl-label.active .tl-num{background:color-mix(in srgb,var(--accent) 22%,var(--bg));color:var(--text)}
       .fb-hero{height:240px}
       .fb-body{padding:32px 16px 64px}
     }
@@ -583,7 +590,11 @@
 
     function setGroup(i,fromDrag){
       i=Math.max(0,Math.min(N-1,i));
-      if(i!==active){ active=i; render(i); }
+      if(i!==active){
+        active=i; render(i);
+        // тактильный отклик на пересечении границы группы при драге
+        if(fromDrag&&navigator.vibrate)navigator.vibrate(9);
+      }
       bgEls.forEach((b,k)=>b.classList.toggle('active',k===i));
       labelEls.forEach((l,k)=>l.classList.toggle('active',k===i));
       const cnt=groups[i].slides.length;
@@ -611,7 +622,7 @@
     function endDrag(){
       if(!dragging)return;
       dragging=false;timeline.classList.remove('dragging');
-      placePlayheadGroup(active);   // доводим линию к центру активной группы
+      // без снапа: линия остаётся ровно там, где отпустили
     }
     timeline.addEventListener('pointerup',endDrag);
     timeline.addEventListener('pointercancel',endDrag);
