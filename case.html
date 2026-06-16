@@ -536,17 +536,18 @@
     const counter=sec.querySelector('#scrubCounter');
     let active=0;
 
-    // высокая картинка (не влезает в окно) → скролл; иначе → заполняем высоту
+    // длинная картинка (заметно выше своей ширины) → внутренний скролл;
+    // остальные (≈квадрат и шире) → заполняют окно без пустот.
+    // Классифицируем по форме самой картинки, а не по размеру окна, чтобы
+    // на любом экране поведение было одинаковым.
     function fitImage(){
       if(!img.naturalWidth)return;
-      const dispH=win.clientWidth*img.naturalHeight/img.naturalWidth;
-      const tall=dispH>win.clientHeight+1;
+      const tall=img.naturalHeight/img.naturalWidth>1.2;
       img.classList.toggle('tall',tall);
       img.classList.toggle('fill',!tall);
     }
     img.addEventListener('load',()=>{win.scrollTop=0;fitImage();});
     if(img.complete)fitImage();
-    window.addEventListener('resize',fitImage);
 
     function placePlayhead(frac){ // frac 0..1 по ширине segs
       playhead.style.transform=`translateX(${frac*segs.clientWidth}px)`;
