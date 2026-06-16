@@ -96,24 +96,35 @@
     }
     .stack-head{position:absolute;top:22px;left:32px;right:32px;z-index:40;pointer-events:none}
     .stack-head a,.stack-head .case-cat{pointer-events:auto}
-    .stack-title-row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:10px;gap:12px}
     .stack-title{
       font-family:'Space Grotesk',system-ui,sans-serif;
       font-size:clamp(26px,3.4vw,42px);font-weight:700;letter-spacing:-.03em;line-height:1;
+      margin-top:10px;
     }
+    .stack-head .case-cat{margin-top:12px}
+    .stack-hint{
+      position:absolute;left:32px;bottom:26px;z-index:40;
+      font-size:11px;color:var(--muted);opacity:.75;
+      display:inline-flex;align-items:center;gap:6px;pointer-events:none;
+    }
+    .stack-hint i{font-size:14px}
     .stack-stage{
       position:relative;flex:1;display:flex;align-items:center;justify-content:center;
       perspective:1400px;
     }
     .sframe{
-      position:absolute;width:min(70vw,66vh);aspect-ratio:4/3;
-      border-radius:18px;overflow:hidden;
+      position:absolute;height:min(56vh,52vw);aspect-ratio:16/9;
+      border-radius:50px;overflow:hidden;
       box-shadow:var(--shadow-lg);
       transition:transform .55s cubic-bezier(.22,.61,.36,1),opacity .55s ease;
       will-change:transform,opacity;backface-visibility:hidden;
       transform-origin:center center;
     }
-    .sframe img,.sframe video{width:100%;height:100%;object-fit:cover;display:block}
+    .sframe img,.sframe video{
+      width:100%;height:100%;object-fit:cover;object-position:top;display:block;
+      transform-origin:top center;
+      transition:transform .55s cubic-bezier(.22,.61,.36,1);
+    }
 
     /* правый столбец точек-индикаторов кадров */
     .stack-dots{
@@ -244,9 +255,10 @@
       .nav-links{display:none}
       .theme-btn{grid-column:3}
       .stack-head{left:16px;top:16px;right:16px}
+      .stack-hint{display:none}
       .stack-foot{flex-wrap:nowrap;gap:8px;padding:0 12px}
       .scase{font-size:11.5px;padding:8px 12px;max-width:38vw}
-      .sframe{width:min(88vw,52vh);aspect-ratio:1/1}
+      .sframe{height:auto;width:min(90vw,52vh);aspect-ratio:1/1;border-radius:28px}
       .scrub{padding:24px 16px 32px}
       .scrub-window{height:50vh}
       .seg{font-size:0;padding:11px 4px}
@@ -366,11 +378,10 @@
     sec.innerHTML=`
       <div class="stack-head">
         <a href="index.html" class="back-btn"><i class="ti ti-arrow-left"></i> Назад</a>
-        <div class="stack-title-row">
-          <div class="stack-title">${c.title}</div>
-          <span class="case-cat">${cat}</span>
-        </div>
+        <div class="stack-title">${c.title}</div>
+        <span class="case-cat">${cat}</span>
       </div>
+      <div class="stack-hint"><i class="ti ti-mouse"></i> Колесо или ↑ ↓ — листать рендеры</div>
       <div class="stack-stage" id="stackStage">${framesHTML}</div>
       <div class="stack-dots" id="stackDots">
         ${frames.map((f,i)=>`<button class="sdot" data-i="${i}" aria-label="Кадр ${i+1}"></button>`).join('')}
@@ -405,6 +416,10 @@
         el.style.transform=`translateY(${ty}px) scale(${sx},${sy})`;
         el.style.opacity=op;
         el.style.zIndex=z;
+        // контр-масштаб медиа: соседи показывают верхний срез картинки в натуральных
+        // пропорциях (fill по высоте), а не сплющенную целую картинку
+        const m=el.firstElementChild;
+        if(m)m.style.transform=`scaleY(${1/sy})`;
       });
       dots.forEach((d,i)=>d.classList.toggle('active',i===active));
       countEl.textContent=String(active+1).padStart(2,'0')+' / '+String(els.length).padStart(2,'0');
