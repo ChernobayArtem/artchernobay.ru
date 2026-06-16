@@ -113,10 +113,10 @@
       perspective:1400px;
     }
     .sframe{
-      position:absolute;height:min(56vh,52vw);aspect-ratio:16/9;
+      position:absolute;width:min(70vw,66vh);aspect-ratio:4/3;
       border-radius:50px;overflow:hidden;
       box-shadow:var(--shadow-lg);
-      transition:transform .55s cubic-bezier(.22,.61,.36,1),opacity .55s ease;
+      transition:transform .55s cubic-bezier(.22,.61,.36,1),opacity .55s ease,border-radius .55s ease;
       will-change:transform,opacity;backface-visibility:hidden;
       transform-origin:center center;
     }
@@ -258,7 +258,7 @@
       .stack-hint{display:none}
       .stack-foot{flex-wrap:nowrap;gap:8px;padding:0 12px}
       .scase{font-size:11.5px;padding:8px 12px;max-width:38vw}
-      .sframe{height:auto;width:min(90vw,52vh);aspect-ratio:1/1;border-radius:28px}
+      .sframe{width:min(88vw,52vh);aspect-ratio:1/1;border-radius:28px}
       .scrub{padding:24px 16px 32px}
       .scrub-window{height:50vh}
       .seg{font-size:0;padding:11px 4px}
@@ -420,6 +420,10 @@
         // пропорциях (fill по высоте), а не сплющенную целую картинку
         const m=el.firstElementChild;
         if(m)m.style.transform=`scaleY(${1/sy})`;
+        // сжатые соседи — скругление-«пилюля»: радиус задаём эллипсом, чтобы после
+        // squish по вертикали концы выглядели полностью закруглёнными, а не обрубком
+        if(off===0)el.style.borderRadius='';
+        else{const rr=band/2;el.style.borderRadius=`${rr}px / ${(rr/sy).toFixed(1)}px`;}
       });
       dots.forEach((d,i)=>d.classList.toggle('active',i===active));
       countEl.textContent=String(active+1).padStart(2,'0')+' / '+String(els.length).padStart(2,'0');
