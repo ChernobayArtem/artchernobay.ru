@@ -1,0 +1,17 @@
+const CASES=[
+  {slug:'listy',cat:'mobile',title:'Listy',sub:'Мобильное приложение для совместных покупок',lbg:'#dbeafe',dbg:'#1e3a5f',img:'preview/listy.jpg'},
+  {slug:'produktovyy-podhod',cat:'mobile',title:'Продуктовый подход',sub:'Продуктовый подход к дизайну мобильного приложения',lbg:'#dcfce7',dbg:'#14532d',img:'preview/product-approach.jpg'},
+  {slug:'aviar',cat:'mobile',title:'Aviar',sub:'Мобильное приложение по покупке авиабилетов',lbg:'#ede9fe',dbg:'#2e1065',img:'preview/aviar.jpg'},
+  {slug:'dryclean',cat:'mobile',title:'DryClean',sub:'Мобильное приложение для сети химчисток',lbg:'#fef3c7',dbg:'#451a03',img:'preview/DryClean.jpg'},
+  {slug:'onboarding-whatsnew',cat:'mobile',title:"Onboarding & What's new",sub:'UX/UI-дизайн',lbg:'#fce7f3',dbg:'#500724',img:'preview/onboarding-whatsnew.jpg'},
+  {slug:'not-a-robot',cat:'3d',title:'NOT A ROBOT',sub:'Хард-сёрфейс',lbg:'#f1f5f9',dbg:'#0f172a',img:'preview/robot.jpeg'},
+  {slug:'not-a-plane',cat:'3d',title:'NOT A PLANE',sub:'Хард-сёрфейс',lbg:'#e0f2fe',dbg:'#082f49',img:'preview/plane.jpeg'},
+  {slug:'not-a-flag',cat:'3d',title:'NOT A FLAG',sub:'Пиксель-арт',lbg:'#fff7ed',dbg:'#431407',vid:'preview/flag.mp4',rate:0.7},
+  {slug:'not-a-house',cat:'3d',title:'NOT A HOUSE',sub:'Диорама',lbg:'#f0fdf4',dbg:'#052e16',img:'preview/house.jpeg'},
+  {slug:'ruins',cat:'3d',title:'Ruins',sub:'Диорама',lbg:'#fdf4ff',dbg:'#3b0764',img:'preview/ruins.jpeg'},
+  {slug:'coffee-shop',cat:'3d',title:'Coffee Shop',sub:'Диорама',lbg:'#fff8f0',dbg:'#3b1500',img:'preview/coffe-shop.jpeg'},
+  {slug:'presents',cat:'3d',title:'Presents',sub:'3D-сцена',lbg:'#fff0f0',dbg:'#3a0000',img:'preview/presents.jpeg'},
+  {slug:'hawaiian-island',cat:'3d',title:'Hawaiian Island',sub:'Диорама',lbg:'#ecfdf5',dbg:'#003a1a',img:'preview/island.jpeg'},
+  {slug:'forest-road',cat:'3d',title:'Forest Road',sub:'Диорама',lbg:'#f0fdf0',dbg:'#003a00',img:'preview/road-sun.jpeg',imgNight:'preview/road-night.jpeg'},
+  {slug:'donuts',cat:'3d',title:'Donuts',sub:'3D-сцена',lbg:'#fff0f8',dbg:'#3a0025',img:'preview/donuts.jpeg'},
+];

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Артём Чернобай — UX/UI-дизайнер</title>
+  <script>if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
   <meta name="description" content="Артём Чернобай — ведущий UX/UI-дизайнер. Проектирую интерфейсы для сложных B2B/B2G-систем.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
@@ -707,27 +708,9 @@
 
 </div>
 
+<script src="cases-data.js"></script>
 <script>
-const CASES=[
-  {cat:'mobile',title:'Listy',sub:'Мобильное приложение для совместных покупок',lbg:'#dbeafe',dbg:'#1e3a5f',img:'preview/listy.jpg'},
-  {cat:'mobile',title:'Продуктовый подход',sub:'Продуктовый подход к дизайну мобильного приложения',lbg:'#dcfce7',dbg:'#14532d',img:'preview/product-approach.jpg'},
-  {cat:'mobile',title:'Aviar',sub:'Мобильное приложение по покупке авиабилетов',lbg:'#ede9fe',dbg:'#2e1065',img:'preview/aviar.jpg'},
-  {cat:'mobile',title:'DryClean',sub:'Мобильное приложение для сети химчисток',lbg:'#fef3c7',dbg:'#451a03',img:'preview/DryClean.jpg'},
-  {cat:'mobile',title:"Onboarding & What's new",sub:'UX/UI-дизайн',lbg:'#fce7f3',dbg:'#500724',img:'preview/onboarding-whatsnew.jpg'},
-  {cat:'3d',title:'NOT A ROBOT',sub:'Хард-сёрфейс',lbg:'#f1f5f9',dbg:'#0f172a',img:'preview/robot.jpeg'},
-  {cat:'3d',title:'NOT A PLANE',sub:'Хард-сёрфейс',lbg:'#e0f2fe',dbg:'#082f49',img:'preview/plane.jpeg'},
-  {cat:'3d',title:'NOT A FLAG',sub:'Пиксель-арт',lbg:'#fff7ed',dbg:'#431407',vid:'preview/flag.mp4',rate:0.7},
-  {cat:'3d',title:'NOT A HOUSE',sub:'Диорама',lbg:'#f0fdf4',dbg:'#052e16',img:'preview/house.jpeg'},
-  {cat:'3d',title:'Ruins',sub:'Диорама',lbg:'#fdf4ff',dbg:'#3b0764',img:'preview/ruins.jpeg'},
-  {cat:'3d',title:'Coffee Shop',sub:'Диорама',lbg:'#fff8f0',dbg:'#3b1500',img:'preview/coffe-shop.jpeg'},
-  {cat:'3d',title:'Bedroom',sub:'Диорама',lbg:'#f5f0ff',dbg:'#2d003a',img:'preview/bedroom.jpeg'},
-  {cat:'3d',title:'Presents',sub:'3D-сцена',lbg:'#fff0f0',dbg:'#3a0000',img:'preview/presents.jpeg'},
-  {cat:'3d',title:'Hawaiian Island',sub:'Диорама',lbg:'#ecfdf5',dbg:'#003a1a',img:'preview/island.jpeg'},
-  {cat:'3d',title:'Forest Road',sub:'Диорама',lbg:'#f0fdf0',dbg:'#003a00',img:'preview/road-sun.jpeg',imgNight:'preview/road-night.jpeg'},
-  {cat:'3d',title:'Donuts',sub:'3D-сцена',lbg:'#fff0f8',dbg:'#3a0025',img:'preview/donuts.jpeg'},
-];
-
-let theme='light',activeTab='all';
+let theme=localStorage.getItem('theme')||'light',activeTab='all';
 
 const PAGE_SIZE=4; // карточек за один раз
 let infiniteObs=null;  // IntersectionObserver для подгрузки
@@ -735,7 +718,7 @@ let currentList=[];    // текущий отфильтрованный спис
 let loadedCount=0;     // сколько уже показано
 
 function makeCard(c,tab,delay){
-  return `<div class="case-card reveal" style="transition-delay:${delay}s">
+  return `<div class="case-card reveal" style="transition-delay:${delay}s" onclick="openCase('${c.slug}')">
     <div class="case-preview" style="background:${theme==='dark'?c.dbg:c.lbg}">
       ${c.vid?`<video src="${c.vid}" autoplay loop muted playsinline preload="auto"${c.rate?` data-rate="${c.rate}"`:''} style="width:100%;height:100%;object-fit:cover;display:block;"></video>`:c.imgNight?`<img src="${c.img}" alt="${c.title}" class="rd-img rd-day"><img src="${c.imgNight}" alt="" aria-hidden="true" class="rd-img rd-night">`:c.img?`<img src="${c.img}" alt="${c.title}" style="width:100%;height:100%;object-fit:cover;display:block;">`:`<span class="case-preview-lbl" style="color:${theme==='dark'?'rgba(255,255,255,0.18)':'rgba(0,0,0,0.13)'}">${c.title.toUpperCase()}</span>`}
     </div>
@@ -855,10 +838,13 @@ function filterCases(tab,btn){
 
 function toggleTheme(){
   theme=theme==='light'?'dark':'light';
+  localStorage.setItem('theme',theme);
   document.documentElement.setAttribute('data-theme',theme==='dark'?'dark':'');
   document.getElementById('themeIcon').className=theme==='dark'?'ti ti-sun':'ti ti-moon';
   renderCases(activeTab);
 }
+
+function openCase(slug){window.location.href='case.html#'+slug;}
 
 /* Переключение Сейчас/Ранее в карточке работы */
 function switchWork(pane,btn){
@@ -1111,6 +1097,8 @@ function initLogo(){
 })();
 
 document.addEventListener('DOMContentLoaded',()=>{
+  document.documentElement.setAttribute('data-theme',theme==='dark'?'dark':'');
+  document.getElementById('themeIcon').className=theme==='dark'?'ti ti-sun':'ti ti-moon';
   renderCases('all');
   updateExp();
   initLogo();

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кейс — Артём Чернобай</title>
+  <script>if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    :root{
+      --bg:#ffffff;--surface:#f8f7f4;--border:rgba(0,0,0,0.08);--border-hover:rgba(0,0,0,0.22);
+      --text:#0c0c0c;--text2:#444444;--muted:#888888;--muted2:#555555;
+      --card:#fafaf7;--tag:#f0eeea;--inv:#0c0c0c;--invt:#ffffff;
+      --nav-bg:rgba(255,255,255,0.92);
+      --shadow:0 8px 28px rgba(0,0,0,0.07);
+    }
+    [data-theme="dark"]{
+      --bg:#0c0c0c;--surface:#161616;--border:rgba(255,255,255,0.07);--border-hover:rgba(255,255,255,0.22);
+      --text:#efefef;--text2:#cccccc;--muted:#666666;--muted2:#aaaaaa;
+      --card:#131313;--tag:#1e1e1e;--inv:#efefef;--invt:#0c0c0c;
+      --nav-bg:rgba(12,12,12,0.92);--shadow:0 8px 28px rgba(0,0,0,0.35);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      font-family:'Inter',system-ui,sans-serif;
+      background:var(--bg);color:var(--text);
+      transition:background .25s,color .25s;
+      -webkit-font-smoothing:antialiased;overflow-x:hidden;
+    }
+    .sg{font-family:'Space Grotesk',system-ui,sans-serif}
+
+    .nav{
+      position:sticky;top:0;z-index:100;
+      background:var(--nav-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+      border-bottom:0.5px solid var(--border);
+      padding:13px 32px;
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .back-btn{
+      font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;
+      display:inline-flex;align-items:center;gap:6px;
+      transition:color .15s;
+    }
+    .back-btn:hover{color:var(--text)}
+    .theme-btn{
+      width:32px;height:32px;border-radius:9px;border:none;
+      background:var(--inv);color:var(--invt);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;font-size:14px;
+      transition:opacity .15s,transform .2s;
+    }
+    .theme-btn:hover{opacity:.8;transform:translateY(-2px)}
+
+    .case-hero{
+      width:100%;height:480px;overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+      transition:background .25s;
+    }
+    .case-hero img,.case-hero video{width:100%;height:100%;object-fit:cover;display:block;}
+    .case-hero-lbl{
+      font-family:'Space Grotesk',system-ui,sans-serif;
+      font-size:clamp(24px,6vw,72px);font-weight:700;letter-spacing:-.03em;
+      opacity:0.12;user-select:none;
+    }
+
+    .case-body{max-width:800px;margin:0 auto;padding:48px 32px 80px}
+    .case-cat{
+      display:inline-block;
+      font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;
+      color:var(--muted2);background:var(--tag);border:0.5px solid var(--border);
+      border-radius:20px;padding:3px 10px;margin-bottom:20px;
+    }
+    .case-title-lg{
+      font-family:'Space Grotesk',system-ui,sans-serif;
+      font-size:clamp(32px,5vw,56px);font-weight:700;letter-spacing:-.03em;
+      line-height:1.1;margin-bottom:12px;
+    }
+    .case-sub-lg{font-size:16px;color:var(--muted);line-height:1.7;margin-bottom:40px}
+    .case-divider{height:0.5px;background:var(--border);margin-bottom:40px}
+    .case-placeholder{
+      font-size:14px;color:var(--muted);text-align:center;padding:56px 24px;
+      border:0.5px dashed var(--border);border-radius:12px;line-height:1.6;
+    }
+
+    @media(max-width:480px){
+      .nav{padding:13px 16px}
+      .case-hero{height:260px}
+      .case-body{padding:32px 16px 64px}
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="back-btn">
+      <i class="ti ti-arrow-left"></i> Назад
+    </a>
+    <button class="theme-btn" onclick="toggleTheme()" aria-label="Переключить тему">
+      <i class="ti ti-moon" id="themeIcon"></i>
+    </button>
+  </nav>
+
+  <div id="caseHero" class="case-hero"></div>
+
+  <div class="case-body">
+    <span class="case-cat" id="caseCat"></span>
+    <h1 class="case-title-lg" id="caseTitle"></h1>
+    <p class="case-sub-lg" id="caseSub"></p>
+    <div class="case-divider"></div>
+    <div class="case-placeholder">Кейс-стади в разработке</div>
+  </div>
+
+  <script src="cases-data.js"></script>
+  <script>
+    let theme = localStorage.getItem('theme') || 'light';
+
+    function applyTheme(){
+      document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+      document.getElementById('themeIcon').className = theme === 'dark' ? 'ti ti-sun' : 'ti ti-moon';
+    }
+
+    function toggleTheme(){
+      theme = theme === 'light' ? 'dark' : 'light';
+      localStorage.setItem('theme', theme);
+      applyTheme();
+      const hero = document.getElementById('caseHero');
+      if(c) hero.style.background = theme === 'dark' ? c.dbg : c.lbg;
+    }
+
+    const slug = location.hash.slice(1);
+    const c = slug ? CASES.find(x => x.slug === slug) : null;
+
+    if(!c){
+      location.href = 'index.html';
+    } else {
+      document.title = c.title + ' — Артём Чернобай';
+      document.getElementById('caseCat').textContent = c.cat === 'mobile' ? 'Мобилка' : '3D · Blender';
+      document.getElementById('caseTitle').textContent = c.title;
+      document.getElementById('caseSub').textContent = c.sub;
+
+      const hero = document.getElementById('caseHero');
+      hero.style.background = theme === 'dark' ? c.dbg : c.lbg;
+
+      if(c.vid){
+        const v = document.createElement('video');
+        v.src = c.vid; v.autoplay = true; v.loop = true; v.muted = true; v.playsInline = true;
+        if(c.rate){ v.defaultPlaybackRate = c.rate; v.playbackRate = c.rate; }
+        v.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+        hero.appendChild(v);
+      } else if(c.img){
+        const img = document.createElement('img');
+        img.src = c.img; img.alt = c.title;
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+        hero.appendChild(img);
+      } else {
+        const lbl = document.createElement('div');
+        lbl.className = 'case-hero-lbl';
+        lbl.textContent = c.title;
+        hero.appendChild(lbl);
+      }
+
+      applyTheme();
+    }
+  </script>
+</body>
+</html>
