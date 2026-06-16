@@ -180,55 +180,49 @@
     .scrub-window::-webkit-scrollbar{width:8px}
     .scrub-window::-webkit-scrollbar-thumb{background:var(--border-hover);border-radius:8px}
     .scrub-img{
-      width:100%;display:block;transition:opacity .22s ease;
+      width:100%;display:block;opacity:0;transition:opacity .25s ease;
     }
-    /* картинка ниже окна — заполняет высоту (object-fit:cover, без пустот) */
+    .scrub-img:not(:first-child){margin-top:12px} /* разделитель между слайдами группы */
+    /* широкий слайд — заполняет высоту (object-fit:cover, без пустот) */
     .scrub-img.fill{height:100%;object-fit:cover;object-position:top}
-    /* картинка выше окна — натуральная высота, окно скроллится */
+    /* контентный/высокий слайд — натуральная высота, окно скроллится */
     .scrub-img.tall{height:auto}
-    .scrub-img.fading{opacity:0}
 
     /* таймлайн-скруббер */
     .scrub-bar{margin-top:18px;user-select:none}
-    .segs{
-      position:relative;display:flex;gap:6px;
-      touch-action:none;cursor:grab;
-    }
-    .segs.dragging{cursor:grabbing}
+    .segs{display:flex;gap:6px}
     .seg{
       flex:1 1 0;min-width:0;
-      padding:13px 10px;border-radius:10px;border:none;
+      padding:11px 10px;border-radius:10px;border:none;
       background:var(--tag);color:var(--muted2);
       font-size:12.5px;font-weight:500;font-family:inherit;
       cursor:pointer;transition:background .2s,color .2s;
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;
-      pointer-events:auto;
     }
     .seg:hover{background:var(--border)}
     .seg.active{background:var(--accent);color:#fff}
     .seg-num{display:none}
 
-    /* плейхед */
-    .playhead{
-      position:absolute;top:-7px;bottom:-7px;left:0;width:0;
-      pointer-events:none;z-index:5;
-      transition:transform .25s cubic-bezier(.22,.61,.36,1);
+    /* дорожка с круглым бегунком — отдельной строкой, не наезжает на текст */
+    .track{
+      position:relative;height:22px;margin-top:16px;
+      display:flex;align-items:center;cursor:grab;touch-action:none;
     }
-    .segs.dragging .playhead{transition:none}
-    .playhead::before{ /* вертикальная линия */
-      content:'';position:absolute;left:-1px;top:0;bottom:0;width:2px;
-      background:var(--text);border-radius:2px;
+    .track.dragging{cursor:grabbing}
+    .track-line{
+      position:absolute;left:0;right:0;height:3px;border-radius:3px;background:var(--tag);
     }
-    .playhead::after{ /* треугольник сверху */
-      content:'';position:absolute;left:-6px;top:-1px;
-      border-left:6px solid transparent;border-right:6px solid transparent;
-      border-top:8px solid var(--text);
+    .track-fill{
+      position:absolute;left:0;height:3px;border-radius:3px;background:var(--accent);
+      transition:width .28s cubic-bezier(.22,.61,.36,1);
     }
-
-    /* линейка делений */
-    .ticks{display:flex;justify-content:space-between;margin-top:12px;padding:0 2px}
-    .tick{width:1px;height:7px;background:var(--border-hover);opacity:.55}
-    .tick.major{height:11px;opacity:.9}
+    .knob{
+      position:absolute;left:0;width:16px;height:16px;border-radius:50%;
+      background:var(--text);border:2.5px solid var(--bg);box-shadow:var(--shadow);
+      transform:translateX(-50%);
+      transition:left .28s cubic-bezier(.22,.61,.36,1);
+    }
+    .track.dragging .track-fill,.track.dragging .knob{transition:none}
 
     .scrub-counter{
       margin-top:14px;font-size:12px;color:var(--muted);
@@ -309,15 +303,12 @@
       {img:'cases/robot/6.jpg'},
       {vid:'cases/robot/video.mp4'},
     ]},
-    'listy':{type:'scrubber',frames:[
-      {img:'cases/listy/1.jpg',label:'Возможности'},
-      {img:'cases/listy/2.jpg',label:'С чего началось'},
-      {img:'cases/listy/3.jpg',label:'Визуал'},
-      {img:'cases/listy/4.jpg',label:'Функциональность'},
-      {img:'cases/listy/5.jpg',label:'Промолендинг'},
-      {img:'cases/listy/6.jpg',label:'Сторы'},
-      {img:'cases/listy/7.jpg',label:'Что дальше'},
-      {img:'cases/listy/8.jpg',label:'Итоги'},
+    'listy':{type:'scrubber',groups:[
+      {label:'Возможности',  slides:[{img:'cases/listy/1.jpg'}]},
+      {label:'Идея и визуал', slides:[{img:'cases/listy/2.jpg'},{img:'cases/listy/3.jpg'}]},
+      {label:'Реализация',   slides:[{img:'cases/listy/4.jpg'},{img:'cases/listy/5.jpg'},{img:'cases/listy/6.jpg'}]},
+      {label:'Что дальше',   slides:[{img:'cases/listy/7.jpg'}]},
+      {label:'Итоги',        slides:[{img:'cases/listy/8.jpg'}]},
     ]},
   };
 
@@ -355,7 +346,7 @@
     const media=CASE_MEDIA[slug];
     const stage=document.getElementById('stage');
     if(media&&media.type==='stack')      buildStack(c,media.frames,stage);
-    else if(media&&media.type==='scrubber') buildScrubber(c,media.frames,stage);
+    else if(media&&media.type==='scrubber') buildScrubber(c,media.groups,stage);
     else                                  buildFallback(c,stage);
   }
 
@@ -497,15 +488,12 @@
   /* ============================================================
      ГОРИЗОНТАЛЬНЫЙ СКРУББЕР (UX)
      ============================================================ */
-  function buildScrubber(c,frames,stage){
+  function buildScrubber(c,groups,stage){
     const cat=c.cat==='mobile'?'Мобилка':'Веб';
     const sec=document.createElement('section');
     sec.className='scrub';
 
-    const N=frames.length;
-    const tickCount=41;
-    let ticksHTML='';
-    for(let i=0;i<tickCount;i++)ticksHTML+=`<span class="tick${i%5===0?' major':''}"></span>`;
+    const N=groups.length;
 
     sec.innerHTML=`
       <div class="scrub-head">
@@ -515,97 +503,105 @@
           <span class="case-cat">${cat}</span>
         </div>
       </div>
-      <div class="scrub-window" id="scrubWindow">
-        <img class="scrub-img" id="scrubImg" src="${frames[0].img}" alt="${c.title} — ${frames[0].label}">
-      </div>
+      <div class="scrub-window" id="scrubWindow"></div>
       <div class="scrub-bar">
         <div class="segs" id="segs">
-          ${frames.map((f,i)=>`<button class="seg${i===0?' active':''}" data-i="${i}"><span class="seg-text">${f.label}</span><span class="seg-num">${i+1}</span></button>`).join('')}
-          <div class="playhead" id="playhead"></div>
+          ${groups.map((g,i)=>`<button class="seg${i===0?' active':''}" data-i="${i}"><span class="seg-text">${g.label}</span><span class="seg-num">${i+1}</span></button>`).join('')}
         </div>
-        <div class="ticks">${ticksHTML}</div>
-        <div class="scrub-counter" id="scrubCounter">01 / ${String(N).padStart(2,'0')} · ${frames[0].label}</div>
+        <div class="track" id="track">
+          <div class="track-line"></div>
+          <div class="track-fill" id="trackFill"></div>
+          <div class="knob" id="knob"></div>
+        </div>
+        <div class="scrub-counter" id="scrubCounter"></div>
       </div>`;
     stage.appendChild(sec);
 
-    const segs=sec.querySelector('#segs');
     const segEls=[...sec.querySelectorAll('.seg')];
-    const playhead=sec.querySelector('#playhead');
-    const img=sec.querySelector('#scrubImg');
+    const track=sec.querySelector('#track');
+    const fill=sec.querySelector('#trackFill');
+    const knob=sec.querySelector('#knob');
     const win=sec.querySelector('#scrubWindow');
     const counter=sec.querySelector('#scrubCounter');
-    let active=0;
+    let active=-1;
 
-    // только широкие («киношные») слайды заполняют окно (cover, без пустот);
-    // всё, что ближе к квадрату или выше — скроллится, чтобы было видно целиком.
-    // Классифицируем по форме самой картинки, а не по размеру окна, чтобы
-    // на любом экране поведение было одинаковым.
-    function fitImage(){
-      if(!img.naturalWidth)return;
-      const tall=img.naturalHeight/img.naturalWidth>0.62;
-      img.classList.toggle('tall',tall);
-      img.classList.toggle('fill',!tall);
+    function placeKnob(frac){
+      const x=frac*track.clientWidth;
+      knob.style.left=x+'px';
+      fill.style.width=x+'px';
     }
-    img.addEventListener('load',()=>{win.scrollTop=0;fitImage();});
-    if(img.complete)fitImage();
 
-    function placePlayhead(frac){ // frac 0..1 по ширине segs
-      playhead.style.transform=`translateX(${frac*segs.clientWidth}px)`;
-    }
-    function setFrame(i,fromDrag){
-      i=Math.max(0,Math.min(N-1,i));
-      if(i!==active){
-        active=i;
-        img.classList.add('fading');
-        setTimeout(()=>{
-          img.src=frames[i].img;
-          img.alt=c.title+' — '+frames[i].label;
-          img.classList.remove('fading');
-        },140);
+    // широкий одиночный слайд заполняет окно (cover); контентный/высокий и
+    // любые слайды в группе из нескольких — натуральная высота + скролл окна
+    function applyMode(img,single){
+      if(single && img.naturalWidth && img.naturalHeight/img.naturalWidth<=0.62){
+        img.classList.add('fill');img.classList.remove('tall');
+      }else{
+        img.classList.add('tall');img.classList.remove('fill');
       }
-      segEls.forEach((s,k)=>s.classList.toggle('active',k===i));
-      counter.textContent=String(i+1).padStart(2,'0')+' / '+String(N).padStart(2,'0')+' · '+frames[i].label;
-      if(!fromDrag)placePlayhead((i+0.5)/N);
     }
 
-    // клик по сегменту
-    segEls.forEach(s=>s.addEventListener('click',()=>setFrame(+s.dataset.i)));
+    function render(i){
+      const g=groups[i], single=g.slides.length===1;
+      win.innerHTML='';
+      g.slides.forEach((s,k)=>{
+        const im=document.createElement('img');
+        im.className='scrub-img';
+        im.src=s.img;
+        im.alt=c.title+' — '+g.label+(single?'':' · '+(k+1));
+        const fit=()=>applyMode(im,single);
+        if(im.complete&&im.naturalWidth)fit(); else im.addEventListener('load',fit,{once:true});
+        win.appendChild(im);
+      });
+      win.scrollTop=0;
+      requestAnimationFrame(()=>win.querySelectorAll('.scrub-img').forEach(im=>im.style.opacity=1));
+    }
 
-    // драг по таймлайну
+    function setGroup(i,fromDrag){
+      i=Math.max(0,Math.min(N-1,i));
+      if(i!==active){ active=i; render(i); }
+      segEls.forEach((s,k)=>s.classList.toggle('active',k===i));
+      const cnt=groups[i].slides.length;
+      counter.textContent=String(i+1).padStart(2,'0')+' / '+String(N).padStart(2,'0')+' · '+groups[i].label+(cnt>1?' · '+cnt+' экр.':'');
+      if(!fromDrag)placeKnob((i+0.5)/N);
+    }
+
+    // клик по кнопке группы
+    segEls.forEach(s=>s.addEventListener('click',()=>setGroup(+s.dataset.i)));
+
+    // драг бегунка по дорожке
     let dragging=false;
     function fracFromX(clientX){
-      const r=segs.getBoundingClientRect();
+      const r=track.getBoundingClientRect();
       return Math.max(0,Math.min(1,(clientX-r.left)/r.width));
     }
     function onMove(clientX){
       const frac=fracFromX(clientX);
-      placePlayhead(frac);
-      const i=Math.max(0,Math.min(N-1,Math.floor(frac*N)));
-      setFrame(i,true);
+      placeKnob(frac);
+      setGroup(Math.min(N-1,Math.floor(frac*N)),true);
     }
-    segs.addEventListener('pointerdown',e=>{
-      // клики по кнопке-сегменту обрабатываются отдельно; драг — по фону/линии
-      dragging=true;segs.classList.add('dragging');
-      segs.setPointerCapture(e.pointerId);
+    track.addEventListener('pointerdown',e=>{
+      dragging=true;track.classList.add('dragging');
+      track.setPointerCapture(e.pointerId);
       onMove(e.clientX);
     });
-    segs.addEventListener('pointermove',e=>{if(dragging)onMove(e.clientX);});
+    track.addEventListener('pointermove',e=>{if(dragging)onMove(e.clientX);});
     function endDrag(){
       if(!dragging)return;
-      dragging=false;segs.classList.remove('dragging');
-      placePlayhead((active+0.5)/N); // доводим к центру активного сегмента
+      dragging=false;track.classList.remove('dragging');
+      placeKnob((active+0.5)/N); // доводим бегунок к центру активной группы
     }
-    segs.addEventListener('pointerup',endDrag);
-    segs.addEventListener('pointercancel',endDrag);
+    track.addEventListener('pointerup',endDrag);
+    track.addEventListener('pointercancel',endDrag);
 
-    // клавиатура
+    // клавиатура: ←/→ группы
     window.addEventListener('keydown',e=>{
-      if(e.key==='ArrowRight'){e.preventDefault();setFrame(active+1);}
-      else if(e.key==='ArrowLeft'){e.preventDefault();setFrame(active-1);}
+      if(e.key==='ArrowRight'){e.preventDefault();setGroup(active+1);}
+      else if(e.key==='ArrowLeft'){e.preventDefault();setGroup(active-1);}
     });
 
-    window.addEventListener('resize',()=>placePlayhead((active+0.5)/N));
-    requestAnimationFrame(()=>placePlayhead(0.5/N));
+    window.addEventListener('resize',()=>requestAnimationFrame(()=>placeKnob((active+0.5)/N)));
+    requestAnimationFrame(()=>setGroup(0));
   }
 
   /* ============================================================
