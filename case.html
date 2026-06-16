@@ -188,41 +188,45 @@
     /* контентный/высокий слайд — натуральная высота, окно скроллится */
     .scrub-img.tall{height:auto}
 
-    /* таймлайн-скруббер */
+    /* таймлайн-скруббер: фоны-чипы (низ) ← линия-плейхед (середина) ← подписи (верх) */
     .scrub-bar{margin-top:18px;user-select:none}
-    .segs{display:flex;gap:6px}
-    .seg{
-      flex:1 1 0;min-width:0;
-      padding:11px 10px;border-radius:10px;border:none;
-      background:var(--tag);color:var(--muted2);
-      font-size:12.5px;font-weight:500;font-family:inherit;
-      cursor:pointer;transition:background .2s,color .2s;
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;
+    .timeline{
+      position:relative;height:44px;cursor:grab;touch-action:none;
     }
-    .seg:hover{background:var(--border)}
-    .seg.active{background:var(--accent);color:#fff}
-    .seg-num{display:none}
-
-    /* дорожка с круглым бегунком — отдельной строкой, не наезжает на текст */
-    .track{
-      position:relative;height:22px;margin-top:16px;
-      display:flex;align-items:center;cursor:grab;touch-action:none;
+    .timeline.dragging{cursor:grabbing}
+    /* слой 1 — фоны-чипы (разная ширина = разное кол-во экранов) */
+    .tl-bgs{position:absolute;inset:0;display:flex;gap:6px;z-index:0}
+    .tl-bg{
+      min-width:0;border-radius:11px;background:var(--tag);
+      transition:background .25s,flex-grow .35s cubic-bezier(.22,.61,.36,1);
     }
-    .track.dragging{cursor:grabbing}
-    .track-line{
-      position:absolute;left:0;right:0;height:3px;border-radius:3px;background:var(--tag);
+    .tl-bg:hover{background:var(--border)}
+    .tl-bg.active{background:var(--accent)}
+    /* слой 2 — линия-плейхед: над фонами, под текстом → прячется за буквами */
+    .playhead{
+      position:absolute;top:-4px;bottom:-4px;left:0;width:0;z-index:1;pointer-events:none;
+      transition:transform .3s cubic-bezier(.22,.61,.36,1);
     }
-    .track-fill{
-      position:absolute;left:0;height:3px;border-radius:3px;background:var(--accent);
-      transition:width .28s cubic-bezier(.22,.61,.36,1);
+    .timeline.dragging .playhead{transition:none}
+    .playhead::before{ /* вертикальная линия */
+      content:'';position:absolute;left:-1px;top:0;bottom:0;width:2px;
+      background:var(--text);border-radius:2px;
     }
-    .knob{
-      position:absolute;left:0;width:16px;height:16px;border-radius:50%;
-      background:var(--text);border:2.5px solid var(--bg);box-shadow:var(--shadow);
-      transform:translateX(-50%);
-      transition:left .28s cubic-bezier(.22,.61,.36,1);
+    .playhead::after{ /* кружок-ручка сверху */
+      content:'';position:absolute;left:-5px;top:-3px;width:10px;height:10px;border-radius:50%;
+      background:var(--text);box-shadow:0 0 0 2.5px var(--bg);
     }
-    .track.dragging .track-fill,.track.dragging .knob{transition:none}
+    /* слой 3 — подписи: прозрачный фон, поверх линии (буквы перекрывают линию) */
+    .tl-labels{position:absolute;inset:0;display:flex;gap:6px;z-index:2;pointer-events:none}
+    .tl-label{
+      min-width:0;display:flex;align-items:center;justify-content:center;padding:0 12px;
+    }
+    .tl-text{
+      font-size:12.5px;font-weight:500;color:var(--muted2);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .25s;
+    }
+    .tl-label.active .tl-text{color:#fff}
+    .tl-num{display:none}
 
     .scrub-counter{
       margin-top:14px;font-size:12px;color:var(--muted);
@@ -261,8 +265,10 @@
       .sframe{width:min(88vw,52vh);aspect-ratio:1/1;border-radius:28px}
       .scrub{padding:24px 16px 32px}
       .scrub-window{height:50vh}
-      .seg{font-size:0;padding:11px 4px}
-      .seg-num{display:inline;font-size:12px}
+      .tl-label{padding:0 4px}
+      .tl-text{display:none}
+      .tl-num{display:inline;font-size:12px;font-weight:500;color:var(--muted2)}
+      .tl-label.active .tl-num{color:#fff}
       .fb-hero{height:240px}
       .fb-body{padding:32px 16px 64px}
     }
@@ -494,6 +500,8 @@
     sec.className='scrub';
 
     const N=groups.length;
+    // вес чипа = число экранов в группе (где больше контента — кнопка шире)
+    const weight=g=>g.slides.length;
 
     sec.innerHTML=`
       <div class="scrub-head">
@@ -505,30 +513,36 @@
       </div>
       <div class="scrub-window" id="scrubWindow"></div>
       <div class="scrub-bar">
-        <div class="segs" id="segs">
-          ${groups.map((g,i)=>`<button class="seg${i===0?' active':''}" data-i="${i}"><span class="seg-text">${g.label}</span><span class="seg-num">${i+1}</span></button>`).join('')}
-        </div>
-        <div class="track" id="track">
-          <div class="track-line"></div>
-          <div class="track-fill" id="trackFill"></div>
-          <div class="knob" id="knob"></div>
+        <div class="timeline" id="timeline">
+          <div class="tl-bgs">
+            ${groups.map((g,i)=>`<div class="tl-bg${i===0?' active':''}" data-i="${i}" style="flex:${weight(g)} 1 0"></div>`).join('')}
+          </div>
+          <div class="playhead" id="playhead"></div>
+          <div class="tl-labels">
+            ${groups.map((g,i)=>`<div class="tl-label${i===0?' active':''}" style="flex:${weight(g)} 1 0"><span class="tl-text">${g.label}</span><span class="tl-num">${i+1}</span></div>`).join('')}
+          </div>
         </div>
         <div class="scrub-counter" id="scrubCounter"></div>
       </div>`;
     stage.appendChild(sec);
 
-    const segEls=[...sec.querySelectorAll('.seg')];
-    const track=sec.querySelector('#track');
-    const fill=sec.querySelector('#trackFill');
-    const knob=sec.querySelector('#knob');
+    const timeline=sec.querySelector('#timeline');
+    const bgEls=[...sec.querySelectorAll('.tl-bg')];
+    const labelEls=[...sec.querySelectorAll('.tl-label')];
+    const playhead=sec.querySelector('#playhead');
     const win=sec.querySelector('#scrubWindow');
     const counter=sec.querySelector('#scrubCounter');
     let active=-1;
 
-    function placeKnob(frac){
-      const x=frac*track.clientWidth;
-      knob.style.left=x+'px';
-      fill.style.width=x+'px';
+    // позиционирование плейхеда: либо в пикселях (драг), либо к центру группы
+    function placePlayheadPx(px){ playhead.style.transform=`translateX(${px}px)`; }
+    function placePlayheadGroup(i){
+      const b=bgEls[i];
+      placePlayheadPx(b.offsetLeft+b.offsetWidth/2);
+    }
+    function groupAtX(px){
+      for(let i=0;i<N;i++){ const b=bgEls[i]; if(px<=b.offsetLeft+b.offsetWidth) return i; }
+      return N-1;
     }
 
     // широкий одиночный слайд заполняет окно (cover); контентный/высокий и
@@ -560,39 +574,37 @@
     function setGroup(i,fromDrag){
       i=Math.max(0,Math.min(N-1,i));
       if(i!==active){ active=i; render(i); }
-      segEls.forEach((s,k)=>s.classList.toggle('active',k===i));
+      bgEls.forEach((b,k)=>b.classList.toggle('active',k===i));
+      labelEls.forEach((l,k)=>l.classList.toggle('active',k===i));
       const cnt=groups[i].slides.length;
       counter.textContent=String(i+1).padStart(2,'0')+' / '+String(N).padStart(2,'0')+' · '+groups[i].label+(cnt>1?' · '+cnt+' экр.':'');
-      if(!fromDrag)placeKnob((i+0.5)/N);
+      if(!fromDrag)placePlayheadGroup(i);
     }
 
-    // клик по кнопке группы
-    segEls.forEach(s=>s.addEventListener('click',()=>setGroup(+s.dataset.i)));
-
-    // драг бегунка по дорожке
+    // драг-скраб мышкой/пальцем по всему таймлайну (клик по чипу = тоже сюда)
     let dragging=false;
-    function fracFromX(clientX){
-      const r=track.getBoundingClientRect();
-      return Math.max(0,Math.min(1,(clientX-r.left)/r.width));
+    function xFromClient(clientX){
+      const r=timeline.getBoundingClientRect();
+      return Math.max(0,Math.min(r.width,clientX-r.left));
     }
     function onMove(clientX){
-      const frac=fracFromX(clientX);
-      placeKnob(frac);
-      setGroup(Math.min(N-1,Math.floor(frac*N)),true);
+      const px=xFromClient(clientX);
+      placePlayheadPx(px);          // линия едет ровно за курсором
+      setGroup(groupAtX(px),true);  // активная группа — под курсором
     }
-    track.addEventListener('pointerdown',e=>{
-      dragging=true;track.classList.add('dragging');
-      track.setPointerCapture(e.pointerId);
+    timeline.addEventListener('pointerdown',e=>{
+      dragging=true;timeline.classList.add('dragging');
+      try{timeline.setPointerCapture(e.pointerId);}catch(_){}
       onMove(e.clientX);
     });
-    track.addEventListener('pointermove',e=>{if(dragging)onMove(e.clientX);});
+    timeline.addEventListener('pointermove',e=>{if(dragging)onMove(e.clientX);});
     function endDrag(){
       if(!dragging)return;
-      dragging=false;track.classList.remove('dragging');
-      placeKnob((active+0.5)/N); // доводим бегунок к центру активной группы
+      dragging=false;timeline.classList.remove('dragging');
+      placePlayheadGroup(active);   // доводим линию к центру активной группы
     }
-    track.addEventListener('pointerup',endDrag);
-    track.addEventListener('pointercancel',endDrag);
+    timeline.addEventListener('pointerup',endDrag);
+    timeline.addEventListener('pointercancel',endDrag);
 
     // клавиатура: ←/→ группы
     window.addEventListener('keydown',e=>{
@@ -600,7 +612,7 @@
       else if(e.key==='ArrowLeft'){e.preventDefault();setGroup(active-1);}
     });
 
-    window.addEventListener('resize',()=>requestAnimationFrame(()=>placeKnob((active+0.5)/N)));
+    window.addEventListener('resize',()=>requestAnimationFrame(()=>placePlayheadGroup(active)));
     requestAnimationFrame(()=>setGroup(0));
   }
 
