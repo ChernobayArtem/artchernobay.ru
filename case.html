@@ -174,12 +174,18 @@
     .scrub-window{
       width:100%;height:60vh;min-height:340px;
       border-radius:16px;border:0.5px solid var(--border);
-      background:var(--surface);overflow:hidden;
+      background:var(--surface);overflow-y:auto;overflow-x:hidden;
+      scrollbar-width:thin;scrollbar-color:var(--border-hover) transparent;
     }
+    .scrub-window::-webkit-scrollbar{width:8px}
+    .scrub-window::-webkit-scrollbar-thumb{background:var(--border-hover);border-radius:8px}
     .scrub-img{
-      width:100%;height:100%;object-fit:cover;display:block;
-      transition:opacity .22s ease;
+      width:100%;display:block;transition:opacity .22s ease;
     }
+    /* картинка ниже окна — заполняет высоту (object-fit:cover, без пустот) */
+    .scrub-img.fill{height:100%;object-fit:cover;object-position:top}
+    /* картинка выше окна — натуральная высота, окно скроллится */
+    .scrub-img.tall{height:auto}
     .scrub-img.fading{opacity:0}
 
     /* таймлайн-скруббер */
@@ -529,6 +535,18 @@
     const win=sec.querySelector('#scrubWindow');
     const counter=sec.querySelector('#scrubCounter');
     let active=0;
+
+    // высокая картинка (не влезает в окно) → скролл; иначе → заполняем высоту
+    function fitImage(){
+      if(!img.naturalWidth)return;
+      const dispH=win.clientWidth*img.naturalHeight/img.naturalWidth;
+      const tall=dispH>win.clientHeight+1;
+      img.classList.toggle('tall',tall);
+      img.classList.toggle('fill',!tall);
+    }
+    img.addEventListener('load',()=>{win.scrollTop=0;fitImage();});
+    if(img.complete)fitImage();
+    window.addEventListener('resize',fitImage);
 
     function placePlayhead(frac){ // frac 0..1 по ширине segs
       playhead.style.transform=`translateX(${frac*segs.clientWidth}px)`;
