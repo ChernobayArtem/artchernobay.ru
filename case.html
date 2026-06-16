@@ -191,20 +191,20 @@
     /* таймлайн-скруббер: фоны-чипы (низ) ← линия-плейхед (середина) ← подписи (верх) */
     .scrub-bar{margin-top:18px;user-select:none}
     .timeline{
-      position:relative;height:44px;cursor:grab;touch-action:none;
+      position:relative;height:52px;cursor:grab;touch-action:none;
     }
     .timeline.dragging{cursor:grabbing}
     /* слой 1 — фоны-чипы (разная ширина = разное кол-во экранов) */
-    .tl-bgs{position:absolute;inset:0;display:flex;gap:6px;z-index:0}
+    .tl-bgs{position:absolute;inset:0;display:flex;gap:7px;z-index:0}
     .tl-bg{
-      min-width:0;border-radius:11px;background:var(--tag);
+      min-width:0;border-radius:13px;background:var(--tag);
       transition:background .25s,flex-grow .35s cubic-bezier(.22,.61,.36,1);
     }
     .tl-bg:hover{background:var(--border)}
-    .tl-bg.active{background:var(--accent)}
+    .tl-bg.active{background:color-mix(in srgb,var(--accent) 22%,var(--bg))}
     /* слой 2 — линия-плейхед: над фонами, под текстом → прячется за буквами */
     .playhead{
-      position:absolute;top:-4px;bottom:-4px;left:0;width:0;z-index:1;pointer-events:none;
+      position:absolute;top:-3px;bottom:-3px;left:0;width:0;z-index:1;pointer-events:none;
       transition:transform .3s cubic-bezier(.22,.61,.36,1);
     }
     .timeline.dragging .playhead{transition:none}
@@ -212,24 +212,33 @@
       content:'';position:absolute;left:-1px;top:0;bottom:0;width:2px;
       background:var(--text);border-radius:2px;
     }
-    .playhead::after{ /* кружок-ручка сверху */
-      content:'';position:absolute;left:-5px;top:-3px;width:10px;height:10px;border-radius:50%;
-      background:var(--text);box-shadow:0 0 0 2.5px var(--bg);
+    .playhead::after{ /* треугольник-маркер сверху */
+      content:'';position:absolute;left:-6px;top:-7px;
+      border-left:6px solid transparent;border-right:6px solid transparent;
+      border-top:9px solid var(--text);
     }
     /* слой 3 — подписи: прозрачный фон, поверх линии (буквы перекрывают линию) */
-    .tl-labels{position:absolute;inset:0;display:flex;gap:6px;z-index:2;pointer-events:none}
+    .tl-labels{position:absolute;inset:0;display:flex;gap:7px;z-index:2;pointer-events:none}
     .tl-label{
       min-width:0;display:flex;align-items:center;justify-content:center;padding:0 12px;
     }
     .tl-text{
-      font-size:12.5px;font-weight:500;color:var(--muted2);
+      font-size:14px;font-weight:500;color:var(--muted2);
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .25s;
     }
-    .tl-label.active .tl-text{color:#fff}
+    .tl-label.active .tl-text{color:var(--text);font-weight:600}
     .tl-num{display:none}
 
+    /* линейка-рулетка под чипами */
+    .tl-ruler{
+      position:relative;margin-top:11px;display:flex;justify-content:space-between;
+      padding:0 3px;pointer-events:none;
+    }
+    .tl-tick{width:1px;height:7px;background:var(--border-hover);opacity:.45}
+    .tl-tick.major{height:11px;opacity:.7}
+
     .scrub-counter{
-      margin-top:14px;font-size:12px;color:var(--muted);
+      margin-top:13px;font-size:12px;color:var(--muted);
       font-variant-numeric:tabular-nums;text-align:center;
     }
 
@@ -522,6 +531,7 @@
             ${groups.map((g,i)=>`<div class="tl-label${i===0?' active':''}" style="flex:${weight(g)} 1 0"><span class="tl-text">${g.label}</span><span class="tl-num">${i+1}</span></div>`).join('')}
           </div>
         </div>
+        <div class="tl-ruler">${Array.from({length:41},(_,i)=>`<span class="tl-tick${i%5===0?' major':''}"></span>`).join('')}</div>
         <div class="scrub-counter" id="scrubCounter"></div>
       </div>`;
     stage.appendChild(sec);
