@@ -536,13 +536,13 @@
     const counter=sec.querySelector('#scrubCounter');
     let active=0;
 
-    // длинная картинка (заметно выше своей ширины) → внутренний скролл;
-    // остальные (≈квадрат и шире) → заполняют окно без пустот.
+    // только широкие («киношные») слайды заполняют окно (cover, без пустот);
+    // всё, что ближе к квадрату или выше — скроллится, чтобы было видно целиком.
     // Классифицируем по форме самой картинки, а не по размеру окна, чтобы
     // на любом экране поведение было одинаковым.
     function fitImage(){
       if(!img.naturalWidth)return;
-      const tall=img.naturalHeight/img.naturalWidth>1.2;
+      const tall=img.naturalHeight/img.naturalWidth>0.62;
       img.classList.toggle('tall',tall);
       img.classList.toggle('fill',!tall);
     }
