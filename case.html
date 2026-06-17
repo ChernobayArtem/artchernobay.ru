@@ -185,6 +185,8 @@
       opacity:0;pointer-events:none;
       transition:opacity .5s ease,transform .5s cubic-bezier(.22,.61,.36,1);
       will-change:opacity,transform;
+      overflow-anchor:none;          /* не даём браузеру править scrollTop при подгрузке картинок (рывки) */
+      scroll-behavior:auto;          /* покадровый автоскролл — без smooth-доводки */
     }
     .scrub-layer.front{opacity:1;pointer-events:auto}
     .scrub-layer::-webkit-scrollbar{width:8px}
@@ -616,7 +618,7 @@
         placePlayheadPx(b.offsetLeft+lf*b.offsetWidth); // линия пересекает чип за его сегмент
         setGroup(i,true);
         const maxScroll=front?front.scrollHeight-front.clientHeight:0;
-        if(maxScroll>0)front.scrollTop=lf*maxScroll;     // скролл синхронен прогрессу главы
+        if(maxScroll>0)front.scrollTop=Math.round(lf*maxScroll); // скролл синхронен прогрессу главы (целые px — без дрожи)
         if(ended){autoPlay=false;updatePlayBtn();return;}
       }
       requestAnimationFrame(tickAuto);
@@ -738,13 +740,12 @@
     function endDrag(){
       if(!dragging)return;
       dragging=false;timeline.classList.remove('dragging');
-      // всегда синхронизируем часы автоплея с точкой, где отпустили — чтобы ▶
-      // продолжал отсюда, а не отматывал на старое место
+      // ручной выбор главы → ▶ играет её С НАЧАЛА; горизонтальное место тапа
+      // НЕ привязывается к внутреннему скроллу (иначе тык в правый край большой
+      // главы неожиданно проматывал картинку — это сбивало)
       const px=xFromClient(lastClientX);
       const i=groupAtX(px);
-      const b=bgEls[i];
-      const lf=b.offsetWidth>0?Math.max(0,Math.min(1,(px-b.offsetLeft)/b.offsetWidth)):0;
-      autoT=segCum[i]+lf*segDur(i);
+      autoT=segCum[i];
       lastAutoTs=null;
       updatePlayBtn();
     }
