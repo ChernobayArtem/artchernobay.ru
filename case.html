@@ -242,10 +242,20 @@
     .tl-tick{width:1px;height:7px;background:var(--border-hover);opacity:.45}
     .tl-tick.major{height:11px;opacity:.7}
 
+    .scrub-foot{display:flex;align-items:center;gap:12px;margin-top:13px}
     .scrub-counter{
-      margin-top:13px;font-size:12px;color:var(--muted);
-      font-variant-numeric:tabular-nums;text-align:center;
+      font-size:12px;color:var(--muted);
+      font-variant-numeric:tabular-nums;
     }
+    .play-btn{
+      width:30px;height:30px;border-radius:50%;
+      border:1.5px solid var(--border);cursor:pointer;
+      background:var(--tag);color:var(--text);font-size:13px;
+      display:flex;align-items:center;justify-content:center;
+      transition:background .15s,border-color .15s;flex-shrink:0;
+      line-height:1;padding:0;
+    }
+    .play-btn:hover{background:var(--border-hover)}
 
     /* ============ FALLBACK ============ */
     .fb-hero{
@@ -554,7 +564,10 @@
           </div>
         </div>
         <div class="tl-ruler">${Array.from({length:41},(_,i)=>`<span class="tl-tick${i%5===0?' major':''}"></span>`).join('')}</div>
-        <div class="scrub-counter" id="scrubCounter"></div>
+        <div class="scrub-foot">
+          <button class="play-btn" id="playBtn" aria-label="воспроизвести">▶</button>
+          <div class="scrub-counter" id="scrubCounter"></div>
+        </div>
       </div>`;
     stage.appendChild(sec);
 
@@ -564,7 +577,43 @@
     const playhead=sec.querySelector('#playhead');
     const win=sec.querySelector('#scrubWindow');
     const counter=sec.querySelector('#scrubCounter');
+    const playBtn=sec.querySelector('#playBtn');
     let active=-1;
+
+    // autoplay
+    let autoPlay=false,autoProgress=0,lastAutoTs=null;
+    const AUTO_DURATION=18000;
+    function updatePlayBtn(){
+      playBtn.textContent=autoProgress>=1?'↺':autoPlay?'⏸':'▶';
+    }
+    function tickAuto(ts){
+      if(!autoPlay)return;
+      if(!dragging){
+        if(lastAutoTs!==null)autoProgress+=(ts-lastAutoTs)/AUTO_DURATION;
+        lastAutoTs=ts;
+        const ended=autoProgress>=1;
+        if(ended){autoProgress=1;autoPlay=false;updatePlayBtn();}
+        const px=autoProgress*timeline.clientWidth;
+        placePlayheadPx(px);
+        const gi=groupAtX(px);
+        setGroup(gi,true);
+        const b=bgEls[gi];
+        const frac=b.offsetWidth>0?Math.max(0,Math.min(1,(px-b.offsetLeft)/b.offsetWidth)):0;
+        const maxScroll=win.scrollHeight-win.clientHeight;
+        if(maxScroll>0)win.scrollTop=frac*maxScroll;
+        if(ended)return;
+      }
+      requestAnimationFrame(tickAuto);
+    }
+    function startAuto(){autoPlay=true;lastAutoTs=null;updatePlayBtn();requestAnimationFrame(tickAuto);}
+    function pauseAuto(){autoPlay=false;updatePlayBtn();}
+    function toggleAuto(){
+      if(autoProgress>=1){autoProgress=0;setGroup(0);startAuto();}
+      else if(autoPlay)pauseAuto();
+      else startAuto();
+      haptic();
+    }
+    playBtn.addEventListener('click',toggleAuto);
 
     // позиционирование плейхеда: либо в пикселях (драг), либо к центру группы
     function placePlayheadPx(px){ playhead.style.transform=`translateX(${px}px)`; }
@@ -614,13 +663,14 @@
     }
 
     // драг-скраб мышкой/пальцем по всему таймлайну (клик по чипу = тоже сюда)
-    let dragging=false,lastTick=-1;
+    let dragging=false,lastTick=-1,lastClientX=0;
     const TICKS=40; // делений линейки = интервалов для тик-хаптика
     function xFromClient(clientX){
       const r=timeline.getBoundingClientRect();
       return Math.max(0,Math.min(r.width,clientX-r.left));
     }
     function onMove(clientX){
+      lastClientX=clientX;
       const px=xFromClient(clientX);
       placePlayheadPx(px);          // линия едет ровно за курсором
       setGroup(groupAtX(px),true);  // активная группа — под курсором
@@ -637,15 +687,21 @@
     function endDrag(){
       if(!dragging)return;
       dragging=false;timeline.classList.remove('dragging');
-      // без снапа: линия остаётся ровно там, где отпустили
+      // если autoplay активен — пересчитать прогресс из позиции где отпустили
+      if(autoPlay){
+        const px=xFromClient(lastClientX);
+        autoProgress=Math.max(0,Math.min(1,px/timeline.clientWidth));
+        lastAutoTs=null;
+      }
     }
     timeline.addEventListener('pointerup',endDrag);
     timeline.addEventListener('pointercancel',endDrag);
 
-    // клавиатура: ←/→ группы
+    // клавиатура: ←/→ группы, Space = play/pause
     window.addEventListener('keydown',e=>{
       if(e.key==='ArrowRight'){e.preventDefault();setGroup(active+1);}
       else if(e.key==='ArrowLeft'){e.preventDefault();setGroup(active-1);}
+      else if(e.key===' '){e.preventDefault();toggleAuto();}
     });
 
     window.addEventListener('resize',()=>requestAnimationFrame(()=>placePlayheadGroup(active)));
