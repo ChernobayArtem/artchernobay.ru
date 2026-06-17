@@ -377,11 +377,11 @@
       {label:'UI-kit',       slides:[{img:'cases/aviar/12.jpg'}]},
     ]},
     'dryclean':{type:'scrubber',groups:[
-      {label:'Задача',      slides:[{img:'cases/dryclean/1.jpg'},{img:'cases/dryclean/2.jpg'}]},
-      {label:'Персоны',     slides:[{img:'cases/dryclean/3.jpg'}]},
-      {label:'Возможности', slides:[{img:'cases/dryclean/4.jpg'}]},
-      {label:'UI-kit',      slides:[{img:'cases/dryclean/5.jpg'},{img:'cases/dryclean/6.jpg'}]},
-      {label:'Все экраны',  slides:[{img:'cases/dryclean/7.jpg'}]},
+      {label:'Задача',      w:1,   slides:[{img:'cases/dryclean/1.jpg'},{img:'cases/dryclean/2.jpg'}]},
+      {label:'Персоны',     w:1.5, slides:[{img:'cases/dryclean/3.jpg'}]},
+      {label:'Возможности', w:5,   slides:[{img:'cases/dryclean/4.jpg'}]},
+      {label:'UI-kit',      w:3,   slides:[{img:'cases/dryclean/5.jpg'},{img:'cases/dryclean/6.jpg'}]},
+      {label:'Все экраны',  w:5.5, slides:[{img:'cases/dryclean/7.jpg'}]},
     ]},
   };
 
@@ -590,8 +590,10 @@
     sec.className='scrub';
 
     const N=groups.length;
-    // вес чипа = число экранов в группе (где больше контента — кнопка шире)
-    const weight=g=>g.slides.length;
+    // вес главы = сколько в ней контента. Задаёт И ширину чипа, И длительность
+    // автоплея (выше/длиннее экраны → шире кнопка и дольше показ). Можно указать
+    // вручную через g.w (визуально, на глаз); иначе берём число экранов.
+    const weight=g=>g.w??g.slides.length;
 
     sec.innerHTML=`
       <div class="scrub-head">
@@ -632,11 +634,11 @@
     let active=-1;
 
     // ── AUTOPLAY: виртуальные часы autoT (мс) с адаптивной скоростью ──
-    // каждая глава получает время по числу экранов: больше/выше контента —
-    // дольше показ и медленнее скролл (ощущение «успеваешь рассмотреть»)
-    const VIEW_BASE=4200;   // мс на просмотр главы (≈2x медленнее прежнего)
-    const PER_SLIDE=5200;   // +мс на каждый доп. экран в группе (адаптив по высоте)
-    const segDur=i=>VIEW_BASE+(groups[i].slides.length-1)*PER_SLIDE;
+    // время главы пропорционально её весу (объёму контента): больше/выше
+    // экраны — шире чип, дольше показ и медленнее скролл («успеваешь рассмотреть»)
+    const VIEW_BASE=4200;   // мс на просмотр главы веса 1
+    const PER_UNIT=5200;    // +мс на каждую доп. единицу веса (адаптив по высоте)
+    const segDur=i=>VIEW_BASE+(weight(groups[i])-1)*PER_UNIT;
     const segCum=[]; let _acc=0;
     for(let i=0;i<N;i++){segCum[i]=_acc;_acc+=segDur(i);}
     const TOTAL=_acc;
