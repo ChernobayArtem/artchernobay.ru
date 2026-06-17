@@ -252,6 +252,18 @@
     .tl-tick{width:1px;height:7px;background:var(--border-hover);opacity:.45}
     .tl-tick.major{height:11px;opacity:.7}
 
+    /* мини-таймер между чипами во время паузы */
+    .scrub-bar{position:relative}
+    .dwell-timer{
+      position:absolute;top:78px; /* под линейкой ≈ 52px chips + 11px margin + 15px ruler */
+      transform:translateX(-50%);
+      font-size:11px;font-weight:500;font-variant-numeric:tabular-nums;
+      color:var(--muted);background:var(--tag);
+      padding:2px 7px;border-radius:6px;
+      opacity:0;transition:opacity .18s;pointer-events:none;white-space:nowrap;
+    }
+    .dwell-timer.visible{opacity:1}
+
     .scrub-foot{display:flex;align-items:center;gap:12px;margin-top:13px}
     .scrub-counter{
       font-size:12px;color:var(--muted);
@@ -582,6 +594,7 @@
           </div>
         </div>
         <div class="tl-ruler">${Array.from({length:41},(_,i)=>`<span class="tl-tick${i%5===0?' major':''}"></span>`).join('')}</div>
+        <div class="dwell-timer" id="dwellTimer"></div>
         <div class="scrub-foot">
           <button class="play-btn" id="playBtn" aria-label="воспроизвести">▶</button>
           <div class="scrub-counter" id="scrubCounter"></div>
@@ -596,6 +609,7 @@
     const win=sec.querySelector('#scrubWindow');
     const counter=sec.querySelector('#scrubCounter');
     const playBtn=sec.querySelector('#playBtn');
+    const dwellTimer=sec.querySelector('#dwellTimer');
     let active=-1;
 
     // ── AUTOPLAY: виртуальные часы autoT (мс) с адаптивной скоростью ──
@@ -611,7 +625,19 @@
 
     let autoPlay=false,autoT=0,lastAutoTs=null;
     let dwellEnd=-1,dwellI=-1; // «заморозка» на дне скролла между главами
-    const DWELL_MS=2000;       // пауза только для глав со скроллом
+    // пауза зависит от объёма главы: многослайдовая (большая) — 3с, одиночная — 2с
+    const dwellMsFor=i=>groups[i].slides.length>1?3000:2000;
+    function hideDwellTimer(){ dwellTimer.classList.remove('visible'); }
+    function updateDwellTimer(ts){
+      const remMs=Math.max(0,dwellEnd-ts);
+      const remSec=Math.ceil(remMs/1000)||1;
+      dwellTimer.textContent=remSec+'с';
+      // позиция: центр зазора между chip[dwellI] и chip[dwellI+1]
+      const bL=bgEls[dwellI],bR=bgEls[dwellI+1];
+      const x=(bL.offsetLeft+bL.offsetWidth+bR.offsetLeft)/2;
+      dwellTimer.style.left=x+'px';
+      dwellTimer.classList.add('visible');
+    }
     function updatePlayBtn(){
       playBtn.textContent=autoT>=TOTAL?'↺':autoPlay?'⏸':'▶';
     }
@@ -621,11 +647,12 @@
         // ── фаза паузы на дне скролла ──
         if(dwellEnd>0){
           lastAutoTs=ts;
-          // держим плейхед у правого края чипа и скролл на дне
           const db=bgEls[dwellI];
           placePlayheadPx(db.offsetLeft+db.offsetWidth);
           if(front){const ms=front.scrollHeight-front.clientHeight;if(ms>0)front.scrollTop=ms;}
+          updateDwellTimer(ts);
           if(ts<dwellEnd){requestAnimationFrame(tickAuto);return;}
+          hideDwellTimer();
           dwellEnd=-1;dwellI=-1; // пауза истекла — едем дальше
         }
         if(lastAutoTs!==null)autoT+=(ts-lastAutoTs);
@@ -641,8 +668,8 @@
         if(maxScroll>0)front.scrollTop=Math.round(lf*maxScroll);
         // конец главы + есть что скроллить → запускаем паузу перед следующей
         if(!ended&&lf>=1&&i<N-1&&maxScroll>0&&dwellEnd<0){
-          autoT=segCum[i]+segDur(i)-1; // держим в этом сегменте на 1мс
-          dwellEnd=ts+DWELL_MS;dwellI=i;
+          autoT=segCum[i]+segDur(i)-1;
+          dwellEnd=ts+dwellMsFor(i);dwellI=i;
           if(front)front.scrollTop=maxScroll;
           requestAnimationFrame(tickAuto);return;
         }
@@ -742,6 +769,10 @@
       if(!fromDrag)placePlayheadGroup(i);
     }
 
+    // клик или скролл колесом по окну с картинкой → пауза автоплея
+    win.addEventListener('pointerdown',()=>{ if(autoPlay)pauseAuto(); },{passive:true});
+    win.addEventListener('wheel',()=>{ if(autoPlay)pauseAuto(); },{passive:true});
+
     // драг-скраб мышкой/пальцем по всему таймлайну (клик по чипу = тоже сюда)
     let dragging=false,lastTick=-1,lastClientX=0;
     const TICKS=40; // делений линейки = интервалов для тик-хаптика
@@ -774,7 +805,7 @@
       const i=groupAtX(px);
       autoT=segCum[i];
       lastAutoTs=null;
-      dwellEnd=-1;dwellI=-1; // отменить паузу если была
+      dwellEnd=-1;dwellI=-1;hideDwellTimer(); // отменить паузу если была
       updatePlayBtn();
     }
     timeline.addEventListener('pointerup',endDrag);
@@ -785,7 +816,7 @@
       i=Math.max(0,Math.min(N-1,i));
       setGroup(i);
       autoT=segCum[i];lastAutoTs=null;
-      dwellEnd=-1;dwellI=-1; // отменить паузу если была
+      dwellEnd=-1;dwellI=-1;hideDwellTimer();
       updatePlayBtn();
     }
     window.addEventListener('keydown',e=>{
