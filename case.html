@@ -243,16 +243,14 @@
       background:color-mix(in srgb,var(--accent) 22%,var(--bg));
       color:var(--text);font-weight:600;
     }
-    /* цифра-фолбэк: слово не влезает в чип целиком → показываем номер
-       (правило для всех мобильных кейсов — никаких обрезков под троеточие) */
+    /* цифра вместо слова — только на телефоне (мобильный media-query ниже).
+       На вебе всегда слово целиком: кейсы небольшие, место есть. Без троеточия. */
     .tl-num{
       display:none;
       padding:6px 0;min-width:30px;text-align:center;border-radius:9px;
       background:var(--tag);font-size:13px;font-weight:500;color:var(--muted2);
     }
     .tl-label.active .tl-num{background:color-mix(in srgb,var(--accent) 22%,var(--bg));color:var(--text)}
-    .tl-label.asnum .tl-text{display:none}
-    .tl-label.asnum .tl-num{display:inline}
 
     /* линейка-рулетка под чипами */
     .tl-ruler{
@@ -379,9 +377,9 @@
     'dryclean':{type:'scrubber',groups:[
       {label:'Задача',      w:1,   slides:[{img:'cases/dryclean/1.jpg'},{img:'cases/dryclean/2.jpg'}]},
       {label:'Персоны',     w:1.5, slides:[{img:'cases/dryclean/3.jpg'}]},
-      {label:'Возможности', w:5,   slides:[{img:'cases/dryclean/4.jpg'}]},
-      {label:'UI-kit',      w:3,   slides:[{img:'cases/dryclean/5.jpg'},{img:'cases/dryclean/6.jpg'}]},
-      {label:'Все экраны',  w:5.5, slides:[{img:'cases/dryclean/7.jpg'}]},
+      {label:'Возможности', w:3.5, slides:[{img:'cases/dryclean/4.jpg'}]},
+      {label:'UI-kit',      w:2.5, slides:[{img:'cases/dryclean/5.jpg'},{img:'cases/dryclean/6.jpg'}]},
+      {label:'Все экраны',  w:4,   slides:[{img:'cases/dryclean/7.jpg'}]},
     ]},
   };
 
@@ -637,7 +635,7 @@
     // время главы пропорционально её весу (объёму контента): больше/выше
     // экраны — шире чип, дольше показ и медленнее скролл («успеваешь рассмотреть»)
     const VIEW_BASE=4200;   // мс на просмотр главы веса 1
-    const PER_UNIT=5200;    // +мс на каждую доп. единицу веса (адаптив по высоте)
+    const PER_UNIT=7500;    // +мс на каждую доп. единицу веса (адаптив по высоте)
     const segDur=i=>VIEW_BASE+(weight(groups[i])-1)*PER_UNIT;
     const segCum=[]; let _acc=0;
     for(let i=0;i<N;i++){segCum[i]=_acc;_acc+=segDur(i);}
@@ -856,20 +854,9 @@
       else if(e.key===' '){e.preventDefault();toggleAuto();}
     });
 
-    // ── чипы: слово целиком или цифра, без обрезки под троеточие ──
-    // мерим по жирному (активному) начертанию — худший случай по ширине,
-    // чтобы чип не мигал текст↔цифра при смене активной главы
-    function fitLabels(){
-      labelEls.forEach(lab=>{lab.classList.remove('asnum');lab.querySelector('.tl-text').style.fontWeight='600';});
-      labelEls.forEach(lab=>{
-        const t=lab.querySelector('.tl-text');
-        if(t.scrollWidth>lab.clientWidth) lab.classList.add('asnum');
-        t.style.fontWeight='';
-      });
-    }
-    window.addEventListener('resize',()=>requestAnimationFrame(()=>{fitLabels();placePlayheadGroup(active);}));
-    requestAnimationFrame(()=>{fitLabels();setGroup(0);});
-    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>fitLabels()); // шрифт мог догрузиться — перемерить
+    // чипы: на вебе всегда слово целиком, цифры — только на телефоне (media-query)
+    window.addEventListener('resize',()=>requestAnimationFrame(()=>placePlayheadGroup(active)));
+    requestAnimationFrame(()=>setGroup(0));
   }
 
   /* ============================================================
