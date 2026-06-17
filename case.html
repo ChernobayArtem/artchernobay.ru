@@ -208,12 +208,12 @@
       transition:transform .3s cubic-bezier(.22,.61,.36,1);
     }
     .timeline.dragging .playhead{transition:none}
-    .playhead::before{ /* вертикальная линия (внутри чипа) */
-      content:'';position:absolute;left:-1px;top:4px;bottom:4px;width:2px;
-      background:var(--text);border-radius:2px;
+    .playhead::before{ /* вертикальная линия — прибита к верху и низу чипа */
+      content:'';position:absolute;left:-1px;top:0;bottom:0;width:2px;
+      background:var(--text);
     }
-    .playhead::after{ /* треугольник-маркер сверху, тоже внутри чипа */
-      content:'';position:absolute;left:-5px;top:3px;
+    .playhead::after{ /* треугольник-маркер у самого верхнего края */
+      content:'';position:absolute;left:-5px;top:0;
       border-left:5px solid transparent;border-right:5px solid transparent;
       border-top:8px solid var(--text);
     }
@@ -341,6 +341,21 @@
     'Rock n Roll','Summit',"Don't Go",'Butterflies','Supersonic','RATATA',
     'Still Here','Leave Me Like This'];
   document.getElementById('logoShort').textContent=SKRILLEX[Math.floor(Math.random()*SKRILLEX.length)];
+
+  /* ===== хаптик: Android — Vibration API; iOS Safari — трюк со скрытым
+     switch-input (его переключение во время жеста даёт системный селекшн-тик).
+     Элемент position:fixed в углу вьюпорта — фокус не вызывает скролл. ===== */
+  const _hapLabel=document.createElement('label');
+  _hapLabel.setAttribute('aria-hidden','true');
+  _hapLabel.style.cssText='position:fixed;bottom:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden';
+  const _hapSwitch=document.createElement('input');
+  _hapSwitch.type='checkbox';_hapSwitch.tabIndex=-1;_hapSwitch.setAttribute('switch','');
+  _hapLabel.appendChild(_hapSwitch);
+  document.body.appendChild(_hapLabel);
+  function haptic(){
+    try{ if(navigator.vibrate) navigator.vibrate(7); }catch(_){}
+    try{ _hapLabel.click(); _hapSwitch.blur(); }catch(_){}
+  }
 
   /* ===== тема ===== */
   let theme=localStorage.getItem('theme')||'light';
@@ -590,11 +605,7 @@
 
     function setGroup(i,fromDrag){
       i=Math.max(0,Math.min(N-1,i));
-      if(i!==active){
-        active=i; render(i);
-        // тактильный отклик на пересечении границы группы при драге
-        if(fromDrag&&navigator.vibrate)navigator.vibrate(9);
-      }
+      if(i!==active){ active=i; render(i); }
       bgEls.forEach((b,k)=>b.classList.toggle('active',k===i));
       labelEls.forEach((l,k)=>l.classList.toggle('active',k===i));
       const cnt=groups[i].slides.length;
@@ -603,7 +614,8 @@
     }
 
     // драг-скраб мышкой/пальцем по всему таймлайну (клик по чипу = тоже сюда)
-    let dragging=false;
+    let dragging=false,lastTick=-1;
+    const TICKS=40; // делений линейки = интервалов для тик-хаптика
     function xFromClient(clientX){
       const r=timeline.getBoundingClientRect();
       return Math.max(0,Math.min(r.width,clientX-r.left));
@@ -612,9 +624,12 @@
       const px=xFromClient(clientX);
       placePlayheadPx(px);          // линия едет ровно за курсором
       setGroup(groupAtX(px),true);  // активная группа — под курсором
+      // тик-хаптик как «барабан» пикера: стук на каждом делении линейки
+      const ti=Math.round(px/(timeline.clientWidth/TICKS));
+      if(ti!==lastTick){ lastTick=ti; haptic(); }
     }
     timeline.addEventListener('pointerdown',e=>{
-      dragging=true;timeline.classList.add('dragging');
+      dragging=true;timeline.classList.add('dragging');lastTick=-1;
       try{timeline.setPointerCapture(e.pointerId);}catch(_){}
       onMove(e.clientX);
     });
