@@ -218,6 +218,7 @@
       transition:transform .3s cubic-bezier(.22,.61,.36,1);
     }
     .timeline.dragging .playhead{transition:none}
+    .playhead.hidden{opacity:0} /* во время отсчёта линию прячем, на её месте — число */
     .playhead::before{ /* вертикальная линия — прибита к верху и низу чипа */
       content:'';position:absolute;left:-1px;top:0;bottom:0;width:2px;
       background:var(--text);
@@ -252,15 +253,16 @@
     .tl-tick{width:1px;height:7px;background:var(--border-hover);opacity:.45}
     .tl-tick.major{height:11px;opacity:.7}
 
-    /* мини-таймер между чипами во время паузы */
+    /* отсчёт между чипами — появляется на месте спрятанной линии-скраббера */
     .scrub-bar{position:relative}
     .dwell-timer{
-      position:absolute;top:78px; /* под линейкой ≈ 52px chips + 11px margin + 15px ruler */
-      transform:translateX(-50%);
-      font-size:11px;font-weight:500;font-variant-numeric:tabular-nums;
-      color:var(--muted);background:var(--tag);
-      padding:2px 7px;border-radius:6px;
-      opacity:0;transition:opacity .18s;pointer-events:none;white-space:nowrap;
+      position:absolute;top:26px;            /* центр чип-строки (52px/2) */
+      transform:translate(-50%,-50%);
+      font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;
+      color:var(--text);background:var(--bg);
+      padding:3px 9px;border-radius:8px;
+      box-shadow:0 1px 6px rgba(0,0,0,.14);
+      opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;z-index:5;
     }
     .dwell-timer.visible{opacity:1}
 
@@ -624,19 +626,22 @@
     const segAtT=T=>{for(let i=N-1;i>=0;i--){if(T>=segCum[i])return i;}return 0;};
 
     let autoPlay=false,autoT=0,lastAutoTs=null;
-    let dwellEnd=-1,dwellI=-1; // «заморозка» на дне скролла между главами
-    // пауза зависит от объёма главы: многослайдовая (большая) — 3с, одиночная — 2с
+    let dwellEnd=-1,dwellI=-1; // пауза-отсчёт между главами
+    // пауза перед КАЖДЫМ переключением: больше контента (>1 экр.) → 3с, иначе 2с
     const dwellMsFor=i=>groups[i].slides.length>1?3000:2000;
-    function hideDwellTimer(){ dwellTimer.classList.remove('visible'); }
-    function updateDwellTimer(ts){
-      const remMs=Math.max(0,dwellEnd-ts);
-      const remSec=Math.ceil(remMs/1000)||1;
+    function showDwell(ts){
+      // прячем линию-скраббер, на её месте — отсчёт
+      playhead.classList.add('hidden');
+      const remSec=Math.max(1,Math.ceil((dwellEnd-ts)/1000));
       dwellTimer.textContent=remSec+'с';
-      // позиция: центр зазора между chip[dwellI] и chip[dwellI+1]
       const bL=bgEls[dwellI],bR=bgEls[dwellI+1];
-      const x=(bL.offsetLeft+bL.offsetWidth+bR.offsetLeft)/2;
-      dwellTimer.style.left=x+'px';
+      dwellTimer.style.left=((bL.offsetLeft+bL.offsetWidth+bR.offsetLeft)/2)+'px';
       dwellTimer.classList.add('visible');
+    }
+    function endDwell(){
+      dwellEnd=-1;dwellI=-1;
+      dwellTimer.classList.remove('visible');
+      playhead.classList.remove('hidden'); // линия возвращается на следующий чип
     }
     function updatePlayBtn(){
       playBtn.textContent=autoT>=TOTAL?'↺':autoPlay?'⏸':'▶';
@@ -644,16 +649,14 @@
     function tickAuto(ts){
       if(!autoPlay)return;
       if(!dragging){
-        // ── фаза паузы на дне скролла ──
+        // ── фаза паузы-отсчёта между главами ──
         if(dwellEnd>0){
           lastAutoTs=ts;
-          const db=bgEls[dwellI];
-          placePlayheadPx(db.offsetLeft+db.offsetWidth);
+          // держим скролл текущей главы на дне (если он был)
           if(front){const ms=front.scrollHeight-front.clientHeight;if(ms>0)front.scrollTop=ms;}
-          updateDwellTimer(ts);
+          showDwell(ts);
           if(ts<dwellEnd){requestAnimationFrame(tickAuto);return;}
-          hideDwellTimer();
-          dwellEnd=-1;dwellI=-1; // пауза истекла — едем дальше
+          endDwell(); // отсчёт истёк — едем дальше
         }
         if(lastAutoTs!==null)autoT+=(ts-lastAutoTs);
         lastAutoTs=ts;
@@ -666,11 +669,11 @@
         setGroup(i,true);
         const maxScroll=front?front.scrollHeight-front.clientHeight:0;
         if(maxScroll>0)front.scrollTop=Math.round(lf*maxScroll);
-        // конец главы + есть что скроллить → запускаем паузу перед следующей
-        if(!ended&&lf>=1&&i<N-1&&maxScroll>0&&dwellEnd<0){
+        // конец КАЖДОЙ главы → пауза-отсчёт перед следующей (без скролла тоже)
+        if(!ended&&lf>=1&&i<N-1&&dwellEnd<0){
           autoT=segCum[i]+segDur(i)-1;
           dwellEnd=ts+dwellMsFor(i);dwellI=i;
-          if(front)front.scrollTop=maxScroll;
+          if(maxScroll>0&&front)front.scrollTop=maxScroll;
           requestAnimationFrame(tickAuto);return;
         }
         if(ended){autoPlay=false;updatePlayBtn();return;}
@@ -678,7 +681,7 @@
       requestAnimationFrame(tickAuto);
     }
     function startAuto(){autoPlay=true;lastAutoTs=null;updatePlayBtn();requestAnimationFrame(tickAuto);}
-    function pauseAuto(){autoPlay=false;updatePlayBtn();}
+    function pauseAuto(){autoPlay=false;endDwell();updatePlayBtn();}
     function toggleAuto(){
       if(autoT>=TOTAL){autoT=0;lastAutoTs=null;startAuto();}
       else if(autoPlay)pauseAuto();
@@ -805,7 +808,7 @@
       const i=groupAtX(px);
       autoT=segCum[i];
       lastAutoTs=null;
-      dwellEnd=-1;dwellI=-1;hideDwellTimer(); // отменить паузу если была
+      endDwell(); // отменить отсчёт если был
       updatePlayBtn();
     }
     timeline.addEventListener('pointerup',endDrag);
@@ -816,7 +819,7 @@
       i=Math.max(0,Math.min(N-1,i));
       setGroup(i);
       autoT=segCum[i];lastAutoTs=null;
-      dwellEnd=-1;dwellI=-1;hideDwellTimer();
+      endDwell();
       updatePlayBtn();
     }
     window.addEventListener('keydown',e=>{
