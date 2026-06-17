@@ -377,6 +377,14 @@
     try{ _hapLabel.click(); _hapSwitch.blur(); }catch(_){}
   }
 
+  /* ===== флаг для пропуска прелоадера при возврате на главную ===== */
+  document.addEventListener('click',e=>{
+    const a=e.target.closest('a[href]');
+    if(a&&/index\.html/.test(a.getAttribute('href')||'')){
+      try{sessionStorage.setItem('skipPreloader','1');}catch(_){}
+    }
+  });
+
   /* ===== тема ===== */
   let theme=localStorage.getItem('theme')||'light';
   function applyTheme(){

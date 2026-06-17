@@ -1038,6 +1038,17 @@ function initLogo(){
 
 /* Прелоадер */
 (function(){
+  // если пришли с кейса — не показываем анимацию, просто быстрый fade
+  if(sessionStorage.getItem('skipPreloader')){
+    sessionStorage.removeItem('skipPreloader');
+    const pre=document.getElementById('preloader');
+    pre.style.transition='opacity .28s ease';
+    document.body.classList.remove('loading');
+    requestAnimationFrame(()=>{pre.style.opacity='0';});
+    setTimeout(()=>{pre.style.display='none';},300);
+    return;
+  }
+
   const name='Сайт-портфолио UX/UI-дизайнера';
   const el=document.getElementById('preloaderName');
   const fill=document.getElementById('preloaderFill');
