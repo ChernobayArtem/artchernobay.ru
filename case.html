@@ -651,8 +651,6 @@
       const b=bgEls[i];
       placePlayheadPx(b.offsetLeft+lf*b.offsetWidth);
       setGroup(i,true);
-      const ms=front?front.scrollHeight-front.clientHeight:0;
-      if(ms>0)front.scrollTop=Math.round(lf*ms);
     }
     function tickAuto(ts){
       if(!autoPlay)return;
@@ -660,7 +658,6 @@
         // ── фаза отсчёта между главами ──
         if(dwellEnd>0){
           lastAutoTs=ts;
-          if(front){const ms=front.scrollHeight-front.clientHeight;if(ms>0)front.scrollTop=ms;}
           showDwell(ts);
           if(ts<dwellEnd){requestAnimationFrame(tickAuto);return;}
           endDwell();                          // отсчёт истёк → следующая глава с начала
