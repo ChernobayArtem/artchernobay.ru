@@ -218,7 +218,6 @@
       transition:transform .3s cubic-bezier(.22,.61,.36,1);
     }
     .timeline.dragging .playhead{transition:none}
-    .playhead.hidden{opacity:0} /* во время отсчёта линию прячем, на её месте — число */
     .playhead::before{ /* вертикальная линия — прибита к верху и низу чипа */
       content:'';position:absolute;left:-1px;top:0;bottom:0;width:2px;
       background:var(--text);
@@ -253,15 +252,14 @@
     .tl-tick{width:1px;height:7px;background:var(--border-hover);opacity:.45}
     .tl-tick.major{height:11px;opacity:.7}
 
-    /* отсчёт между чипами — появляется на месте спрятанной линии-скраббера */
+    /* отсчёт между чипами — под линией-скраббером, в строке линейки */
     .scrub-bar{position:relative}
     .dwell-timer{
-      position:absolute;top:26px;            /* центр чип-строки (52px/2) */
-      transform:translate(-50%,-50%);
+      position:absolute;top:60px;            /* в строке линейки, сразу под чипами */
+      transform:translateX(-50%);
       font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;
       color:var(--text);background:var(--bg);
-      padding:3px 9px;border-radius:8px;
-      box-shadow:0 1px 6px rgba(0,0,0,.14);
+      padding:0 7px;
       opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;z-index:5;
     }
     .dwell-timer.visible{opacity:1}
@@ -625,65 +623,68 @@
     const TOTAL=_acc;
     const segAtT=T=>{for(let i=N-1;i>=0;i--){if(T>=segCum[i])return i;}return 0;};
 
-    let autoPlay=false,autoT=0,lastAutoTs=null;
-    let dwellEnd=-1,dwellI=-1; // пауза-отсчёт между главами
+    let autoPlay=false,autoT=0,lastAutoTs=null,displaySeg=0; // displaySeg — текущая глава
+    let dwellEnd=-1,dwellI=-1; // отсчёт-пауза между главами
     // пауза перед КАЖДЫМ переключением: больше контента (>1 экр.) → 3с, иначе 2с
     const dwellMsFor=i=>groups[i].slides.length>1?3000:2000;
     function showDwell(ts){
-      // прячем линию-скраббер, на её месте — отсчёт
-      playhead.classList.add('hidden');
+      const b=bgEls[dwellI];
+      placePlayheadPx(b.offsetLeft+b.offsetWidth);            // линия стоит на границе главы
       const remSec=Math.max(1,Math.ceil((dwellEnd-ts)/1000));
       dwellTimer.textContent=remSec+'с';
-      const bL=bgEls[dwellI],bR=bgEls[dwellI+1];
-      dwellTimer.style.left=((bL.offsetLeft+bL.offsetWidth+bR.offsetLeft)/2)+'px';
+      dwellTimer.style.left=(b.offsetLeft+b.offsetWidth)+'px'; // число под линией, в строке линейки
       dwellTimer.classList.add('visible');
     }
     function endDwell(){
       dwellEnd=-1;dwellI=-1;
       dwellTimer.classList.remove('visible');
-      playhead.classList.remove('hidden'); // линия возвращается на следующий чип
     }
     function updatePlayBtn(){
       playBtn.textContent=autoT>=TOTAL?'↺':autoPlay?'⏸':'▶';
     }
+    function drawSeg(i,lf){
+      const b=bgEls[i];
+      placePlayheadPx(b.offsetLeft+lf*b.offsetWidth);
+      setGroup(i,true);
+      const ms=front?front.scrollHeight-front.clientHeight:0;
+      if(ms>0)front.scrollTop=Math.round(lf*ms);
+    }
     function tickAuto(ts){
       if(!autoPlay)return;
       if(!dragging){
-        // ── фаза паузы-отсчёта между главами ──
+        // ── фаза отсчёта между главами ──
         if(dwellEnd>0){
           lastAutoTs=ts;
-          // держим скролл текущей главы на дне (если он был)
           if(front){const ms=front.scrollHeight-front.clientHeight;if(ms>0)front.scrollTop=ms;}
           showDwell(ts);
           if(ts<dwellEnd){requestAnimationFrame(tickAuto);return;}
-          endDwell(); // отсчёт истёк — едем дальше
+          endDwell();                          // отсчёт истёк → следующая глава с начала
+          displaySeg=Math.min(N-1,displaySeg+1);
+          autoT=segCum[displaySeg];
         }
         if(lastAutoTs!==null)autoT+=(ts-lastAutoTs);
         lastAutoTs=ts;
-        const ended=autoT>=TOTAL;
-        if(ended)autoT=TOTAL;
-        const i=segAtT(autoT);
-        const lf=Math.max(0,Math.min(1,(autoT-segCum[i])/segDur(i)));
-        const b=bgEls[i];
-        placePlayheadPx(b.offsetLeft+lf*b.offsetWidth);
-        setGroup(i,true);
-        const maxScroll=front?front.scrollHeight-front.clientHeight:0;
-        if(maxScroll>0)front.scrollTop=Math.round(lf*maxScroll);
-        // конец КАЖДОЙ главы → пауза-отсчёт перед следующей (без скролла тоже)
-        if(!ended&&lf>=1&&i<N-1&&dwellEnd<0){
-          autoT=segCum[i]+segDur(i)-1;
-          dwellEnd=ts+dwellMsFor(i);dwellI=i;
-          if(maxScroll>0&&front)front.scrollTop=maxScroll;
+        // конец всего ролика
+        if(autoT>=TOTAL){
+          autoT=TOTAL;displaySeg=N-1;drawSeg(N-1,1);
+          autoPlay=false;updatePlayBtn();return;
+        }
+        const segEnd=segCum[displaySeg]+segDur(displaySeg);
+        // достигли конца текущей главы (не последней) → запускаем отсчёт
+        if(autoT>=segEnd&&displaySeg<N-1){
+          autoT=segEnd;drawSeg(displaySeg,1);    // показать самый конец главы
+          dwellEnd=ts+dwellMsFor(displaySeg);dwellI=displaySeg;
           requestAnimationFrame(tickAuto);return;
         }
-        if(ended){autoPlay=false;updatePlayBtn();return;}
+        // обычная отрисовка внутри главы
+        drawSeg(displaySeg,Math.max(0,Math.min(1,(autoT-segCum[displaySeg])/segDur(displaySeg))));
       }
       requestAnimationFrame(tickAuto);
     }
     function startAuto(){autoPlay=true;lastAutoTs=null;updatePlayBtn();requestAnimationFrame(tickAuto);}
     function pauseAuto(){autoPlay=false;endDwell();updatePlayBtn();}
     function toggleAuto(){
-      if(autoT>=TOTAL){autoT=0;lastAutoTs=null;startAuto();}
+      if(autoT>=TOTAL){autoT=0;displaySeg=0;lastAutoTs=null;startAuto();}
       else if(autoPlay)pauseAuto();
       else startAuto();              // продолжает с autoT (синхронизирован при драге)
       haptic();
@@ -806,7 +807,7 @@
       // главы неожиданно проматывал картинку — это сбивало)
       const px=xFromClient(lastClientX);
       const i=groupAtX(px);
-      autoT=segCum[i];
+      autoT=segCum[i];displaySeg=i;
       lastAutoTs=null;
       endDwell(); // отменить отсчёт если был
       updatePlayBtn();
@@ -818,7 +819,7 @@
     function goGroup(i){
       i=Math.max(0,Math.min(N-1,i));
       setGroup(i);
-      autoT=segCum[i];lastAutoTs=null;
+      autoT=segCum[i];displaySeg=i;lastAutoTs=null;
       endDwell();
       updatePlayBtn();
     }
