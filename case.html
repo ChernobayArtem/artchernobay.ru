@@ -189,8 +189,8 @@
       scroll-behavior:auto;          /* покадровый автоскролл — без smooth-доводки */
     }
     .scrub-layer.front{opacity:1;pointer-events:auto}
-    .scrub-layer::-webkit-scrollbar{width:8px}
-    .scrub-layer::-webkit-scrollbar-thumb{background:var(--border-hover);border-radius:8px}
+    .scrub-layer{scrollbar-width:none}
+    .scrub-layer::-webkit-scrollbar{display:none}
     .scrub-img{width:100%;display:block}
     .scrub-img:not(:first-child){margin-top:12px} /* разделитель между слайдами группы */
     /* широкий слайд — заполняет высоту (object-fit:cover, без пустот) */
