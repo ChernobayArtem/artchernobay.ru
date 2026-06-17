@@ -257,8 +257,8 @@
     .dwell-timer{
       position:absolute;top:60px;            /* в строке линейки, сразу под чипами */
       transform:translateX(-50%);
-      font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;
-      color:var(--text);background:var(--bg);
+      font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;
+      color:var(--muted);background:var(--bg);  /* серый — это хинт, без акцента */
       padding:0 7px;
       opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;z-index:5;
     }
@@ -270,14 +270,13 @@
       font-variant-numeric:tabular-nums;
     }
     .play-btn{
-      width:30px;height:30px;border-radius:50%;
-      border:1.5px solid var(--border);cursor:pointer;
-      background:var(--tag);color:var(--text);font-size:13px;
+      width:24px;height:24px;cursor:pointer;
+      border:none;background:transparent;color:var(--text);font-size:15px;
       display:flex;align-items:center;justify-content:center;
-      transition:background .15s,border-color .15s;flex-shrink:0;
+      transition:opacity .15s;flex-shrink:0;
       line-height:1;padding:0;
     }
-    .play-btn:hover{background:var(--border-hover)}
+    .play-btn:hover{opacity:.55}
 
     /* ============ FALLBACK ============ */
     .fb-hero{
@@ -625,14 +624,15 @@
 
     let autoPlay=false,autoT=0,lastAutoTs=null,displaySeg=0; // displaySeg — текущая глава
     let dwellEnd=-1,dwellI=-1; // отсчёт-пауза между главами
-    // пауза перед КАЖДЫМ переключением: больше контента (>1 экр.) → 3с, иначе 2с
-    const dwellMsFor=i=>groups[i].slides.length>1?3000:2000;
+    // пауза-отсчёт перед КАЖДЫМ переключением — 2с (3с было слишком долго)
+    const dwellMsFor=i=>2000;
     function showDwell(ts){
-      const b=bgEls[dwellI];
-      placePlayheadPx(b.offsetLeft+b.offsetWidth);            // линия стоит на границе главы
+      const bL=bgEls[dwellI],bR=bgEls[dwellI+1];
+      const gx=(bL.offsetLeft+bL.offsetWidth+bR.offsetLeft)/2; // центр зазора между чипами
+      placePlayheadPx(gx);                                     // линия ровно посередине
       const remSec=Math.max(1,Math.ceil((dwellEnd-ts)/1000));
       dwellTimer.textContent=remSec+'с';
-      dwellTimer.style.left=(b.offsetLeft+b.offsetWidth)+'px'; // число под линией, в строке линейки
+      dwellTimer.style.left=gx+'px';                           // число под линией
       dwellTimer.classList.add('visible');
     }
     function endDwell(){
@@ -643,6 +643,7 @@
       playBtn.textContent=autoT>=TOTAL?'↺':autoPlay?'⏸':'▶';
     }
     function drawSeg(i,lf){
+      playhead.style.opacity='';     // линия видима во время проигрывания
       const b=bgEls[i];
       placePlayheadPx(b.offsetLeft+lf*b.offsetWidth);
       setGroup(i,true);
@@ -664,9 +665,10 @@
         }
         if(lastAutoTs!==null)autoT+=(ts-lastAutoTs);
         lastAutoTs=ts;
-        // конец всего ролика
+        // конец всего ролика — показать последнюю главу и убрать скраббер
         if(autoT>=TOTAL){
           autoT=TOTAL;displaySeg=N-1;drawSeg(N-1,1);
+          playhead.style.opacity='0';        // в самом конце линию убираем
           autoPlay=false;updatePlayBtn();return;
         }
         const segEnd=segCum[displaySeg]+segDur(displaySeg);
@@ -786,6 +788,7 @@
     }
     function onMove(clientX){
       lastClientX=clientX;
+      playhead.style.opacity='';    // линия видима (если тащим после конца)
       const px=xFromClient(clientX);
       placePlayheadPx(px);          // линия едет ровно за курсором
       setGroup(groupAtX(px),true);  // активная группа — под курсором
