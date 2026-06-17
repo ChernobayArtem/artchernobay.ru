@@ -602,12 +602,24 @@
     const segAtT=T=>{for(let i=N-1;i>=0;i--){if(T>=segCum[i])return i;}return 0;};
 
     let autoPlay=false,autoT=0,lastAutoTs=null;
+    let dwellEnd=-1,dwellI=-1; // «заморозка» на дне скролла между главами
+    const DWELL_MS=2000;       // пауза только для глав со скроллом
     function updatePlayBtn(){
       playBtn.textContent=autoT>=TOTAL?'↺':autoPlay?'⏸':'▶';
     }
     function tickAuto(ts){
       if(!autoPlay)return;
       if(!dragging){
+        // ── фаза паузы на дне скролла ──
+        if(dwellEnd>0){
+          lastAutoTs=ts;
+          // держим плейхед у правого края чипа и скролл на дне
+          const db=bgEls[dwellI];
+          placePlayheadPx(db.offsetLeft+db.offsetWidth);
+          if(front){const ms=front.scrollHeight-front.clientHeight;if(ms>0)front.scrollTop=ms;}
+          if(ts<dwellEnd){requestAnimationFrame(tickAuto);return;}
+          dwellEnd=-1;dwellI=-1; // пауза истекла — едем дальше
+        }
         if(lastAutoTs!==null)autoT+=(ts-lastAutoTs);
         lastAutoTs=ts;
         const ended=autoT>=TOTAL;
@@ -615,10 +627,17 @@
         const i=segAtT(autoT);
         const lf=Math.max(0,Math.min(1,(autoT-segCum[i])/segDur(i)));
         const b=bgEls[i];
-        placePlayheadPx(b.offsetLeft+lf*b.offsetWidth); // линия пересекает чип за его сегмент
+        placePlayheadPx(b.offsetLeft+lf*b.offsetWidth);
         setGroup(i,true);
         const maxScroll=front?front.scrollHeight-front.clientHeight:0;
-        if(maxScroll>0)front.scrollTop=Math.round(lf*maxScroll); // скролл синхронен прогрессу главы (целые px — без дрожи)
+        if(maxScroll>0)front.scrollTop=Math.round(lf*maxScroll);
+        // конец главы + есть что скроллить → запускаем паузу перед следующей
+        if(!ended&&lf>=1&&i<N-1&&maxScroll>0&&dwellEnd<0){
+          autoT=segCum[i]+segDur(i)-1; // держим в этом сегменте на 1мс
+          dwellEnd=ts+DWELL_MS;dwellI=i;
+          if(front)front.scrollTop=maxScroll;
+          requestAnimationFrame(tickAuto);return;
+        }
         if(ended){autoPlay=false;updatePlayBtn();return;}
       }
       requestAnimationFrame(tickAuto);
@@ -747,6 +766,7 @@
       const i=groupAtX(px);
       autoT=segCum[i];
       lastAutoTs=null;
+      dwellEnd=-1;dwellI=-1; // отменить паузу если была
       updatePlayBtn();
     }
     timeline.addEventListener('pointerup',endDrag);
@@ -756,7 +776,9 @@
     function goGroup(i){
       i=Math.max(0,Math.min(N-1,i));
       setGroup(i);
-      autoT=segCum[i];lastAutoTs=null;updatePlayBtn(); // ▶ продолжит отсюда
+      autoT=segCum[i];lastAutoTs=null;
+      dwellEnd=-1;dwellI=-1; // отменить паузу если была
+      updatePlayBtn();
     }
     window.addEventListener('keydown',e=>{
       if(e.key==='ArrowRight'){e.preventDefault();goGroup(active+1);}
