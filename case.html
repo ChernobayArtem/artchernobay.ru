@@ -236,14 +236,23 @@
     .tl-text{
       max-width:100%;padding:6px 12px;border-radius:9px;background:var(--tag);
       font-size:14px;font-weight:500;color:var(--muted2);
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      white-space:nowrap;overflow:hidden;
       transition:color .25s,background .25s;
     }
     .tl-label.active .tl-text{
       background:color-mix(in srgb,var(--accent) 22%,var(--bg));
       color:var(--text);font-weight:600;
     }
-    .tl-num{display:none}
+    /* цифра-фолбэк: слово не влезает в чип целиком → показываем номер
+       (правило для всех мобильных кейсов — никаких обрезков под троеточие) */
+    .tl-num{
+      display:none;
+      padding:6px 0;min-width:30px;text-align:center;border-radius:9px;
+      background:var(--tag);font-size:13px;font-weight:500;color:var(--muted2);
+    }
+    .tl-label.active .tl-num{background:color-mix(in srgb,var(--accent) 22%,var(--bg));color:var(--text)}
+    .tl-label.asnum .tl-text{display:none}
+    .tl-label.asnum .tl-num{display:inline}
 
     /* линейка-рулетка под чипами */
     .tl-ruler{
@@ -312,11 +321,7 @@
       .scrub{padding:24px 16px 32px}
       .scrub-window{height:50vh}
       .tl-text{display:none}
-      .tl-num{
-        display:inline;padding:6px 0;min-width:30px;text-align:center;border-radius:9px;
-        background:var(--tag);font-size:12px;font-weight:500;color:var(--muted2);
-      }
-      .tl-label.active .tl-num{background:color-mix(in srgb,var(--accent) 22%,var(--bg));color:var(--text)}
+      .tl-num{display:inline}
       .fb-hero{height:240px}
       .fb-body{padding:32px 16px 64px}
     }
@@ -370,6 +375,13 @@
       {label:'Анализ',       slides:[{img:'cases/aviar/5.jpg'},{img:'cases/aviar/6.jpg'}]},
       {label:'Возможности',  slides:[{img:'cases/aviar/7.jpg'},{img:'cases/aviar/8.jpg'},{img:'cases/aviar/9.jpg'},{img:'cases/aviar/10.jpg'},{img:'cases/aviar/11.jpg'}]},
       {label:'UI-kit',       slides:[{img:'cases/aviar/12.jpg'}]},
+    ]},
+    'dryclean':{type:'scrubber',groups:[
+      {label:'Задача',      slides:[{img:'cases/dryclean/1.jpg'},{img:'cases/dryclean/2.jpg'}]},
+      {label:'Персоны',     slides:[{img:'cases/dryclean/3.jpg'}]},
+      {label:'Возможности', slides:[{img:'cases/dryclean/4.jpg'}]},
+      {label:'UI-kit',      slides:[{img:'cases/dryclean/5.jpg'},{img:'cases/dryclean/6.jpg'}]},
+      {label:'Все экраны',  slides:[{img:'cases/dryclean/7.jpg'}]},
     ]},
   };
 
@@ -842,8 +854,20 @@
       else if(e.key===' '){e.preventDefault();toggleAuto();}
     });
 
-    window.addEventListener('resize',()=>requestAnimationFrame(()=>placePlayheadGroup(active)));
-    requestAnimationFrame(()=>setGroup(0));
+    // ── чипы: слово целиком или цифра, без обрезки под троеточие ──
+    // мерим по жирному (активному) начертанию — худший случай по ширине,
+    // чтобы чип не мигал текст↔цифра при смене активной главы
+    function fitLabels(){
+      labelEls.forEach(lab=>{lab.classList.remove('asnum');lab.querySelector('.tl-text').style.fontWeight='600';});
+      labelEls.forEach(lab=>{
+        const t=lab.querySelector('.tl-text');
+        if(t.scrollWidth>lab.clientWidth) lab.classList.add('asnum');
+        t.style.fontWeight='';
+      });
+    }
+    window.addEventListener('resize',()=>requestAnimationFrame(()=>{fitLabels();placePlayheadGroup(active);}));
+    requestAnimationFrame(()=>{fitLabels();setGroup(0);});
+    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>fitLabels()); // шрифт мог догрузиться — перемерить
   }
 
   /* ============================================================
