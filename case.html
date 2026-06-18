@@ -196,6 +196,8 @@
     .scrub-img.fill{height:100%;object-fit:cover;object-position:top}
     /* контентный/высокий слайд — натуральная высота, окно скроллится */
     .scrub-img.tall{height:auto}
+    /* «целиком»: вся картинка влезает в окно без скролла (для обложек) */
+    .scrub-img.contain{height:100%;object-fit:contain}
 
     /* таймлайн-скруббер: фоны-чипы (низ) ← линия-плейхед (середина) ← подписи (верх) */
     .scrub-bar{margin-top:18px;user-select:none}
@@ -380,6 +382,14 @@
       {label:'Возможности', w:3.5, slides:[{img:'cases/dryclean/4.jpg'}]},
       {label:'UI-kit',      w:2.5, slides:[{img:'cases/dryclean/5.jpg'},{img:'cases/dryclean/6.jpg'}]},
       {label:'Все экраны',  w:4,   slides:[{img:'cases/dryclean/7.jpg'}]},
+    ]},
+    'produktovyy-podhod':{type:'scrubber',groups:[
+      {label:'Задача',       w:1.5, fit:true, slides:[{img:'cases/product-approach/1.jpg'}]},
+      {label:'Анализ',       w:2.5, slides:[{img:'cases/product-approach/2.jpg'}]},
+      {label:'Исследование', w:3.6, slides:[{img:'cases/product-approach/3.jpg'}]},
+      {label:'Интервью',     w:1.5, slides:[{img:'cases/product-approach/4.jpg'}]},
+      {label:'Концепция',    w:2.5, slides:[{img:'cases/product-approach/5.jpg'}]},
+      {label:'Дизайн',       w:4.5, slides:[{img:'cases/product-approach/6.jpg'}]},
     ]},
     'onboarding-whatsnew':{type:'scrubber',groups:[
       {label:'Обзор',      w:1,   slides:[{img:'cases/onboarding-whatsnew/1.jpg'}]},
@@ -733,11 +743,13 @@
 
     // широкий одиночный слайд заполняет окно (cover); контентный/высокий и
     // любые слайды в группе из нескольких — натуральная высота + скролл окна
-    function applyMode(img,single){
+    function applyMode(img,single,fit){
+      img.classList.remove('fill','tall','contain');
+      if(fit){img.classList.add('contain');return;}   // вся картинка целиком, без скролла
       if(single && img.naturalWidth && img.naturalHeight/img.naturalWidth<=0.62){
-        img.classList.add('fill');img.classList.remove('tall');
+        img.classList.add('fill');
       }else{
-        img.classList.add('tall');img.classList.remove('fill');
+        img.classList.add('tall');
       }
     }
 
@@ -758,8 +770,8 @@
         im.className='scrub-img';
         im.src=s.img;
         im.alt=c.title+' — '+g.label+(single?'':' · '+(k+1));
-        const fit=()=>applyMode(im,single);
-        if(im.complete&&im.naturalWidth)fit(); else im.addEventListener('load',fit,{once:true});
+        const apply=()=>applyMode(im,single,g.fit);
+        if(im.complete&&im.naturalWidth)apply(); else im.addEventListener('load',apply,{once:true});
         layer.appendChild(im);
       });
       layer.scrollTop=0;
