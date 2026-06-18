@@ -384,12 +384,12 @@
       {label:'Все экраны',  w:4,   slides:[{img:'cases/dryclean/7.jpg'}]},
     ]},
     'produktovyy-podhod':{type:'scrubber',groups:[
-      {label:'Задача',       w:1.5, fit:true, slides:[{img:'cases/product-approach/1.jpg'}]},
+      {label:'Задача',       w:1.5, slides:[{img:'cases/product-approach/1.jpg'}]},
       {label:'Анализ',       w:2.5, slides:[{img:'cases/product-approach/2.jpg'}]},
-      {label:'Исследование', w:3.6, slides:[{img:'cases/product-approach/3.jpg'}]},
+      {label:'Исследование', w:3.6, t:1.25, slides:[{img:'cases/product-approach/3.jpg'}]},
       {label:'Интервью',     w:1.5, slides:[{img:'cases/product-approach/4.jpg'}]},
       {label:'Концепция',    w:2.5, slides:[{img:'cases/product-approach/5.jpg'}]},
-      {label:'Дизайн',       w:4.5, slides:[{img:'cases/product-approach/6.jpg'}]},
+      {label:'Дизайн',       w:4.5, t:1.25, slides:[{img:'cases/product-approach/6.jpg'}]},
     ]},
     'onboarding-whatsnew':{type:'scrubber',groups:[
       {label:'Обзор',      w:1,   slides:[{img:'cases/onboarding-whatsnew/1.jpg'}]},
@@ -651,7 +651,9 @@
     // экраны — шире чип, дольше показ и медленнее скролл («успеваешь рассмотреть»)
     const VIEW_BASE=4200;   // мс на просмотр главы веса 1
     const PER_UNIT=7500;    // +мс на каждую доп. единицу веса (адаптив по высоте)
-    const segDur=i=>VIEW_BASE+(weight(groups[i])-1)*PER_UNIT;
+    // g.t — необязательный множитель времени: замедлить/ускорить показ главы,
+    // НЕ меняя ширину чипа (ширина завязана на weight, скорость — на длительность)
+    const segDur=i=>(VIEW_BASE+(weight(groups[i])-1)*PER_UNIT)*(groups[i].t??1);
     const segCum=[]; let _acc=0;
     for(let i=0;i<N;i++){segCum[i]=_acc;_acc+=segDur(i);}
     const TOTAL=_acc;
