@@ -746,7 +746,7 @@
     function applyMode(img,single,fit,fill){
       img.classList.remove('fill','tall','contain');
       if(fit) {img.classList.add('contain');return;}
-      if(fill){img.classList.add('fill');return;}
+      if(fill && window.innerWidth>680){img.classList.add('fill');return;}
       img.classList.add('tall');
     }
 
