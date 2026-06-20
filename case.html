@@ -384,7 +384,7 @@
       {label:'Все экраны',  w:4,   slides:[{img:'cases/dryclean/7.jpg'}]},
     ]},
     'produktovyy-podhod':{type:'scrubber',groups:[
-      {label:'Задача',       w:1.5, slides:[{img:'cases/product-approach/1.jpg'}]},
+      {label:'Задача',       w:1.5, fill:true, slides:[{img:'cases/product-approach/1.jpg'}]},
       {label:'Анализ',       w:2.5, slides:[{img:'cases/product-approach/2.jpg'}]},
       {label:'Исследование', w:3.6, t:1.25, slides:[{img:'cases/product-approach/3.jpg'}]},
       {label:'Интервью',     w:1.5, slides:[{img:'cases/product-approach/4.jpg'}]},
@@ -743,16 +743,11 @@
       return N-1;
     }
 
-    // широкий одиночный слайд заполняет окно (cover); контентный/высокий и
-    // любые слайды в группе из нескольких — натуральная высота + скролл окна
-    function applyMode(img,single,fit){
+    function applyMode(img,single,fit,fill){
       img.classList.remove('fill','tall','contain');
-      if(fit){img.classList.add('contain');return;}   // вся картинка целиком, без скролла
-      if(single && img.naturalWidth && img.naturalHeight/img.naturalWidth<=0.62){
-        img.classList.add('fill');
-      }else{
-        img.classList.add('tall');
-      }
+      if(fit) {img.classList.add('contain');return;}
+      if(fill){img.classList.add('fill');return;}
+      img.classList.add('tall');
     }
 
     // два слоя кроссфейда внутри окна
@@ -772,7 +767,7 @@
         im.className='scrub-img';
         im.src=s.img;
         im.alt=c.title+' — '+g.label+(single?'':' · '+(k+1));
-        const apply=()=>applyMode(im,single,g.fit);
+        const apply=()=>applyMode(im,single,g.fit,g.fill);
         if(im.complete&&im.naturalWidth)apply(); else im.addEventListener('load',apply,{once:true});
         layer.appendChild(im);
       });
