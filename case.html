@@ -288,7 +288,7 @@
     }
     .play-btn:hover{opacity:.55}
     .scrub-cta{
-      margin-left:auto;
+      margin-top:14px;
       display:inline-flex;align-items:center;gap:6px;
       font-size:12px;font-weight:500;text-decoration:none;
       color:var(--text);background:var(--tag);border:0.5px solid var(--border);
@@ -371,7 +371,7 @@
       {img:'cases/robot/6.jpg'},
       {vid:'cases/robot/video.mp4'},
     ]},
-    'listy':{type:'scrubber',link:'https://my.listy-app.com',groups:[
+    'listy':{type:'scrubber',link:'https://my.listy-app.com',linkText:'Попробовать Listy',groups:[
       {label:'Возможности',   w:1,   slides:[{img:'cases/listy/1.jpg', mobile:'cases/listy/adaptive/1.jpg'}]},
       {label:'Идея и визуал', w:1.6, slides:[{img:'cases/listy/2.jpg'},{img:'cases/listy/3.jpg'}]},
       {label:'Реализация',    w:3,   slides:[{img:'cases/listy/4.jpg'},{img:'cases/listy/5.jpg'},{img:'cases/listy/6.jpg'}]},
@@ -464,7 +464,7 @@
     const media=CASE_MEDIA[slug];
     const stage=document.getElementById('stage');
     if(media&&media.type==='stack')      buildStack(c,media.frames,stage);
-    else if(media&&media.type==='scrubber') buildScrubber(c,media.groups,stage,media.link);
+    else if(media&&media.type==='scrubber') buildScrubber(c,media.groups,stage,media.link,media.linkText);
     else                                  buildFallback(c,stage);
   }
 
@@ -606,7 +606,7 @@
   /* ============================================================
      ГОРИЗОНТАЛЬНЫЙ СКРУББЕР (UX)
      ============================================================ */
-  function buildScrubber(c,groups,stage,link){
+  function buildScrubber(c,groups,stage,link,linkText){
     const cat=c.cat==='mobile'?'Мобилка':'Веб';
     const sec=document.createElement('section');
     sec.className='scrub';
@@ -641,8 +641,8 @@
         <div class="scrub-foot">
           <button class="play-btn" id="playBtn" aria-label="воспроизвести">▶</button>
           <div class="scrub-counter" id="scrubCounter"></div>
-          ${link?`<a class="scrub-cta" href="${link}" target="_blank" rel="noopener">Затестить приложение <i class="ti ti-arrow-up-right"></i></a>`:''}
         </div>
+        ${link?`<a class="scrub-cta" href="${link}" target="_blank" rel="noopener">${linkText||'Попробовать приложение'} <i class="ti ti-arrow-up-right"></i></a>`:''}
       </div>`;
     stage.appendChild(sec);
 
@@ -753,12 +753,11 @@
       return N-1;
     }
 
-    function applyMode(img,single,fit,fill,mobileFill){
+    function applyMode(img,single,fit,fill){
       img.classList.remove('fill','tall','contain');
       if(fit) {img.classList.add('contain');return;}
-      if(mobileFill){img.classList.add('fill');return;}            // адаптивный мобильный кроп — встык, без полей
       if(fill && window.innerWidth>680){img.classList.add('fill');return;}
-      img.classList.add('tall');
+      img.classList.add('tall');                                    // полная картинка по ширине, без обрезки (в т.ч. мобильный кроп)
     }
 
     // два слоя кроссфейда внутри окна
@@ -780,7 +779,7 @@
         const useMobile=!!(s.mobile && narrow);   // на мобиле — отдельный портретный кроп
         im.src=useMobile?s.mobile:s.img;
         im.alt=c.title+' — '+g.label+(single?'':' · '+(k+1));
-        const apply=()=>applyMode(im,single,g.fit,g.fill,useMobile);
+        const apply=()=>applyMode(im,single,g.fit,g.fill);
         if(im.complete&&im.naturalWidth)apply(); else im.addEventListener('load',apply,{once:true});
         layer.appendChild(im);
       });
