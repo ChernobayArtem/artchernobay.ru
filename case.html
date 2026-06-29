@@ -760,6 +760,18 @@
       img.classList.add('tall');                                    // полная картинка по ширине, без обрезки (в т.ч. мобильный кроп)
     }
 
+    // усреднённый цвет нижнего ряда пикселей картинки — чтобы залить им
+    // зазор под картинкой (когда она ниже окна) и он слился с её фоном
+    function edgeColor(im){
+      try{
+        const cv=document.createElement('canvas');cv.width=1;cv.height=1;
+        const cx=cv.getContext('2d');
+        cx.drawImage(im,0,im.naturalHeight-1,im.naturalWidth,1,0,0,1,1);
+        const d=cx.getImageData(0,0,1,1).data;
+        return `rgb(${d[0]},${d[1]},${d[2]})`;
+      }catch(e){return '';}
+    }
+
     // два слоя кроссфейда внутри окна
     const layerA=document.createElement('div');layerA.className='scrub-layer';
     const layerB=document.createElement('div');layerB.className='scrub-layer';
@@ -779,7 +791,8 @@
         const useMobile=!!(s.mobile && narrow);   // на мобиле — отдельный портретный кроп
         im.src=useMobile?s.mobile:s.img;
         im.alt=c.title+' — '+g.label+(single?'':' · '+(k+1));
-        const apply=()=>applyMode(im,single,g.fit,g.fill);
+        const last=k===g.slides.length-1;
+        const apply=()=>{applyMode(im,single,g.fit,g.fill); if(last){const col=edgeColor(im); if(col)layer.style.background=col;}};
         if(im.complete&&im.naturalWidth)apply(); else im.addEventListener('load',apply,{once:true});
         layer.appendChild(im);
       });
