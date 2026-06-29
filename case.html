@@ -363,7 +363,7 @@
       {vid:'cases/robot/video.mp4'},
     ]},
     'listy':{type:'scrubber',groups:[
-      {label:'Возможности',   w:1,   slides:[{img:'cases/listy/1.jpg'}]},
+      {label:'Возможности',   w:1,   slides:[{img:'cases/listy/1.jpg', mobile:'cases/listy/adaptive/1.jpg'}]},
       {label:'Идея и визуал', w:1.6, slides:[{img:'cases/listy/2.jpg'},{img:'cases/listy/3.jpg'}]},
       {label:'Реализация',    w:3,   slides:[{img:'cases/listy/4.jpg'},{img:'cases/listy/5.jpg'},{img:'cases/listy/6.jpg'}]},
       {label:'Что дальше',    w:1,   slides:[{img:'cases/listy/7.jpg'}]},
@@ -743,9 +743,10 @@
       return N-1;
     }
 
-    function applyMode(img,single,fit,fill){
+    function applyMode(img,single,fit,fill,mobileFill){
       img.classList.remove('fill','tall','contain');
       if(fit) {img.classList.add('contain');return;}
+      if(mobileFill){img.classList.add('fill');return;}            // адаптивный мобильный кроп — встык, без полей
       if(fill && window.innerWidth>680){img.classList.add('fill');return;}
       img.classList.add('tall');
     }
@@ -757,17 +758,19 @@
     let front=null;
     // прогрев кэша — чтобы при доезде линии до главы картинки уже были загружены
     // (иначе scrollHeight=0 и скролл не успевает включиться)
-    groups.forEach(g=>g.slides.forEach(s=>{const p=new Image();p.src=s.img;}));
+    groups.forEach(g=>g.slides.forEach(s=>{const p=new Image();p.src=(s.mobile&&window.innerWidth<=680)?s.mobile:s.img;}));
 
     function renderInto(layer,i){
       const g=groups[i], single=g.slides.length===1;
       layer.innerHTML='';
+      const narrow=window.innerWidth<=680;
       g.slides.forEach((s,k)=>{
         const im=document.createElement('img');
         im.className='scrub-img';
-        im.src=s.img;
+        const useMobile=!!(s.mobile && narrow);   // на мобиле — отдельный портретный кроп
+        im.src=useMobile?s.mobile:s.img;
         im.alt=c.title+' — '+g.label+(single?'':' · '+(k+1));
-        const apply=()=>applyMode(im,single,g.fit,g.fill);
+        const apply=()=>applyMode(im,single,g.fit,g.fill,useMobile);
         if(im.complete&&im.naturalWidth)apply(); else im.addEventListener('load',apply,{once:true});
         layer.appendChild(im);
       });
