@@ -91,17 +91,17 @@
     /* ============ STACK (3D) ============ */
     .stack{
       height:calc(100vh - 58px);
+      height:calc(100dvh - 58px);     /* dvh — учитывает адресную строку на мобиле, низ не уезжает за бар */
       position:relative;display:flex;flex-direction:column;overflow:hidden;
       touch-action:none;
     }
     .stack-head{position:absolute;top:22px;left:32px;right:32px;z-index:40;pointer-events:none}
     .stack-head a,.stack-head .case-cat{pointer-events:auto}
+    .stack-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px}
     .stack-title{
       font-family:'Space Grotesk',system-ui,sans-serif;
       font-size:clamp(26px,3.4vw,42px);font-weight:700;letter-spacing:-.03em;line-height:1;
-      margin-top:10px;
     }
-    .stack-head .case-cat{margin-top:12px}
     .stack-hint{
       position:absolute;left:32px;bottom:26px;z-index:40;
       font-size:11px;color:var(--muted);opacity:.75;
@@ -322,11 +322,12 @@
       .nav{padding:13px 16px}
       .nav-links{display:none}
       .theme-btn{grid-column:3}
-      .stack-head{left:16px;top:16px;right:16px}
+      .stack-head{left:0;right:0;top:0;padding:16px 16px 30px;background:linear-gradient(var(--bg) 62%,transparent)}
       .stack-hint{display:none}
-      .stack-foot{flex-wrap:nowrap;gap:8px;padding:0 12px}
+      .stack-dots{right:12px}
+      .stack-foot{bottom:0;flex-wrap:nowrap;gap:8px;padding:18px 12px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 42%)}
       .scase{font-size:11.5px;padding:8px 12px;max-width:38vw}
-      .sframe{width:min(88vw,52vh);aspect-ratio:1/1;border-radius:28px}
+      .sframe{width:min(76vw,46vh);aspect-ratio:1/1;border-radius:28px}
       .scrub{padding:24px 16px 32px}
       .scrub-window{height:50vh}
       .tl-text{display:none}
@@ -493,8 +494,10 @@
     sec.innerHTML=`
       <div class="stack-head">
         <a href="index.html" class="back-btn"><i class="ti ti-arrow-left"></i> Назад</a>
-        <div class="stack-title">${c.title}</div>
-        <span class="case-cat">${cat}</span>
+        <div class="stack-title-row">
+          <div class="stack-title">${c.title}</div>
+          <span class="case-cat">${cat}</span>
+        </div>
       </div>
       <div class="stack-hint"><i class="ti ti-mouse"></i> Колесо или ↑ ↓ — листать рендеры</div>
       <div class="stack-stage" id="stackStage">${framesHTML}</div>
